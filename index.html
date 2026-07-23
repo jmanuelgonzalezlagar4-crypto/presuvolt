@@ -233,6 +233,7 @@
 <div id="modal"></div>
 <script>
 "use strict";
+const VERSION_APP = "v20";
 /* ================= BASE DE PRECIOS DE REFERENCIA (por familias) ================= */
 function preciosReferencia(){
   const R = (k,nombre,unidad,precio,tiempo,fam,esMO) => ({k,nombre,unidad,precio,tiempo:tiempo||0,fam,ref:true,esMO:!!esMO});
@@ -1504,6 +1505,7 @@ function htmlAjustes(){
       <button class="btn sec" onclick="document.getElementById('importar').click()">📂 Cargar copia</button>
     </div>
     ${htmlSyncAjustes()}
+    <div style="text-align:center;color:var(--gris);font-size:.75rem;margin-top:18px;font-family:'IBM Plex Mono',monospace">PresuVolt ${VERSION_APP}</div>
   </div>`;
 }
 function subirLogo(ev){
@@ -1980,7 +1982,7 @@ render();
 iniciarSyncSiConfigurado();
 /* ================= PWA ================= */
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
-  navigator.serviceWorker.register("sw.js").catch(()=>{});
+  navigator.serviceWorker.register("sw.js", {updateViaCache: "none"}).catch(()=>{});
 }
 </script>
 </body>
