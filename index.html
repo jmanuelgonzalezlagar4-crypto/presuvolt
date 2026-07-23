@@ -67,6 +67,7 @@
   .dia-txt{font-size:.95rem;line-height:1.35}
   .dia-meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:5px}
   .dia-acciones{display:flex;flex-direction:column;gap:2px}
+  .badge{position:absolute;top:4px;right:2px;background:#dc2626;color:#fff;border-radius:99px;font-size:.62rem;font-weight:700;min-width:17px;height:17px;display:flex;align-items:center;justify-content:center;padding:0 4px;font-family:'Barlow',sans-serif}
   /* ---- pantalla nota de voz ---- */
   .nota-hero{text-align:center;padding:8px 0 4px}
   .nota-hero p.guia{color:var(--gris);max-width:52ch;margin:0 auto 18px;font-size:.98rem}
@@ -108,8 +109,8 @@
   .sep{height:1.5px;background:var(--linea);margin:18px 0}
   .logo-prev{max-height:56px;max-width:170px;border:1.5px solid var(--linea);border-radius:6px;padding:4px;background:#fff}
   /* ---- precios ---- */
-  .precio-fila{display:grid;grid-template-columns:1fr 64px 104px 92px 34px;gap:8px;align-items:center;margin-bottom:8px}
-  @media(max-width:640px){.precio-fila{grid-template-columns:1fr 50px 84px 76px 30px}}
+  .precio-fila{display:grid;grid-template-columns:1fr 56px 92px 70px 88px 32px;gap:7px;align-items:center;margin-bottom:8px}
+  @media(max-width:640px){.precio-fila{grid-template-columns:1fr 42px 74px 56px 68px 28px}.precio-fila .chip{font-size:.58rem;padding:3px 5px}}
   .precio-fila input{padding:8px;font-size:15px}
   /* ---- nav inferior móvil ---- */
   #nav-movil{display:none;position:fixed;left:0;right:0;bottom:0;background:var(--grafito);z-index:60;justify-content:space-around;padding:5px 4px calc(5px + env(safe-area-inset-bottom))}
@@ -178,32 +179,106 @@
 <div id="modal"></div>
 <script>
 "use strict";
-/* ================= BASE DE PRECIOS DE REFERENCIA ================= */
+/* ================= BASE DE PRECIOS DE REFERENCIA (por familias) ================= */
 function preciosReferencia(){
+  const R = (k,nombre,unidad,precio,tiempo,fam,esMO) => ({k,nombre,unidad,precio,tiempo:tiempo||0,fam,ref:true,esMO:!!esMO});
   return [
-    {k:"panel",    nombre:"Módulo FV 550 W mono",                 unidad:"ud", precio:124,  ref:true, esMO:false},
-    {k:"inv3",     nombre:"Inversor híbrido 3 kW",                unidad:"ud", precio:790,  ref:true, esMO:false},
-    {k:"inv5",     nombre:"Inversor híbrido 5 kW",                unidad:"ud", precio:1150, ref:true, esMO:false},
-    {k:"inv6",     nombre:"Inversor híbrido 6 kW",                unidad:"ud", precio:1290, ref:true, esMO:false},
-    {k:"inv10",    nombre:"Inversor híbrido 10 kW",               unidad:"ud", precio:1980, ref:true, esMO:false},
-    {k:"bateria",  nombre:"Batería litio 5 kWh",                  unidad:"ud", precio:1600, ref:true, esMO:false},
-    {k:"estructura",nombre:"Estructura coplanar + anclajes (por panel)",unidad:"ud", precio:42, ref:true, esMO:false},
-    {k:"cable",    nombre:"Cableado y canalización (por metro)",  unidad:"m",  precio:5.6,  ref:true, esMO:false},
-    {k:"cuadro",   nombre:"Cuadro nuevo con protecciones CA/CC",  unidad:"ud", precio:380,  ref:true, esMO:false},
-    {k:"magneto",  nombre:"Magnetotérmico",                       unidad:"ud", precio:18,   ref:true, esMO:false},
-    {k:"diferencial",nombre:"Diferencial",                        unidad:"ud", precio:45,   ref:true, esMO:false},
-    {k:"bomba",    nombre:"Kit bombeo solar",                     unidad:"ud", precio:950,  ref:true, esMO:false},
-    {k:"legalizacion",nombre:"Legalización y tramitación RD 244/2019",unidad:"ud", precio:350, ref:true, esMO:false},
-    {k:"jornada",  nombre:"Mano de obra (jornada operario)",      unidad:"jorn", precio:240, ref:true, esMO:true},
-    {k:"hora",     nombre:"Mano de obra (hora)",                  unidad:"h",  precio:30,   ref:true, esMO:true},
-    {k:"desplazamiento",nombre:"Desplazamiento / aviso",          unidad:"ud", precio:45,   ref:true, esMO:true},
-    {k:"bombasum", nombre:"Bomba sumergida",                      unidad:"ud", precio:680,  ref:true, esMO:false},
-    {k:"bombapres",nombre:"Grupo de presión",                     unidad:"ud", precio:420,  ref:true, esMO:false},
-    {k:"variador", nombre:"Variador de frecuencia solar",         unidad:"ud", precio:850,  ref:true, esMO:false},
-    {k:"puntoluz", nombre:"Punto de luz",                         unidad:"ud", precio:28,   ref:true, esMO:false},
-    {k:"enchufe",  nombre:"Punto de enchufe",                     unidad:"ud", precio:26,   ref:true, esMO:false},
-    {k:"cuadroind",nombre:"Cuadro industrial trifásico",          unidad:"ud", precio:950,  ref:true, esMO:false},
-    {k:"cargador", nombre:"Cargador coche eléctrico (wallbox)",   unidad:"ud", precio:750,  ref:true, esMO:false}
+  // ☀️ Fotovoltaica
+  R("panel450","Módulo FV 450 W mono","ud",98,.5,"☀️ Fotovoltaica"),
+  R("panel","Módulo FV 550 W mono","ud",124,.5,"☀️ Fotovoltaica"),
+  R("panel600","Módulo FV 600 W bifacial","ud",158,.5,"☀️ Fotovoltaica"),
+  R("inv3","Inversor híbrido 3 kW","ud",790,2,"☀️ Fotovoltaica"),
+  R("inv5","Inversor híbrido 5 kW","ud",1150,2,"☀️ Fotovoltaica"),
+  R("inv6","Inversor híbrido 6 kW","ud",1290,2,"☀️ Fotovoltaica"),
+  R("inv10","Inversor híbrido 10 kW","ud",1980,3,"☀️ Fotovoltaica"),
+  R("microinv","Microinversor 800 W","ud",210,.5,"☀️ Fotovoltaica"),
+  R("bateria","Batería litio 5 kWh","ud",1600,1.5,"☀️ Fotovoltaica"),
+  R("bateria10","Batería litio 10 kWh","ud",2900,2,"☀️ Fotovoltaica"),
+  R("estructura","Estructura coplanar + anclajes (por panel)","ud",42,.4,"☀️ Fotovoltaica"),
+  R("estructura30","Estructura inclinada 30º (por panel)","ud",68,.6,"☀️ Fotovoltaica"),
+  R("protecdc","Protecciones DC (fusibles + sobretensión)","ud",145,1,"☀️ Fotovoltaica"),
+  R("vatimetro","Vatímetro / meter","ud",95,.7,"☀️ Fotovoltaica"),
+  R("legalizacion","Legalización y tramitación RD 244/2019","ud",350,0,"☀️ Fotovoltaica"),
+  // 💧 Bombeo y agua
+  R("bomba","Kit bombeo solar completo","ud",950,4,"💧 Bombeo y agua"),
+  R("bombasum","Bomba sumergida","ud",680,2,"💧 Bombeo y agua"),
+  R("bombapres","Grupo de presión","ud",420,1.5,"💧 Bombeo y agua"),
+  R("variador","Variador de frecuencia solar","ud",850,2,"💧 Bombeo y agua"),
+  R("sonda","Sonda de nivel para pozo","ud",85,.5,"💧 Bombeo y agua"),
+  R("deposito","Depósito 1000 L con boya","ud",240,1,"💧 Bombeo y agua"),
+  // 🔥 Aerotermia
+  R("aero8","Aerotermia monobloc 8 kW","ud",4900,8,"🔥 Aerotermia"),
+  R("aero11","Aerotermia monobloc 11 kW","ud",5900,8,"🔥 Aerotermia"),
+  R("acs200","Depósito ACS 200 L","ud",950,2,"🔥 Aerotermia"),
+  R("sueloradiante","Suelo radiante (m²)","m²",38,.35,"🔥 Aerotermia"),
+  R("radiadorbt","Radiador baja temperatura","ud",320,1,"🔥 Aerotermia"),
+  R("pmarcha","Puesta en marcha y ajuste","ud",280,4,"🔥 Aerotermia"),
+  // ❄️ Climatización
+  R("split3","Split pared 3 kW (instalación básica)","ud",620,3,"❄️ Climatización"),
+  R("split5","Split pared 5 kW (instalación básica)","ud",880,3.5,"❄️ Climatización"),
+  R("multi2","Multisplit 2×1","ud",1450,6,"❄️ Climatización"),
+  R("conductos","Clima por conductos vivienda","ud",2900,16,"❄️ Climatización"),
+  R("rejilla","Rejilla de impulsión/retorno","ud",45,.3,"❄️ Climatización"),
+  R("bombacond","Bomba de condensados","ud",85,.7,"❄️ Climatización"),
+  R("cargagas","Carga de gas refrigerante","ud",120,1,"❄️ Climatización"),
+  // ⚡ Eléctrico general
+  R("puntoluz","Punto de luz","ud",28,.5,"⚡ Eléctrico general"),
+  R("enchufe","Punto de enchufe","ud",26,.45,"⚡ Eléctrico general"),
+  R("puntotv","Toma de TV","ud",32,.5,"⚡ Eléctrico general"),
+  R("rj45","Toma de red RJ45","ud",38,.6,"⚡ Eléctrico general"),
+  R("lineadedicada","Línea dedicada 16 A","ud",95,1.5,"⚡ Eléctrico general"),
+  R("portero","Portero automático (sustitución)","ud",280,3,"⚡ Eléctrico general"),
+  // 🛡️ Cuadros y protecciones
+  R("cuadro","Cuadro vivienda con protecciones","ud",380,4,"🛡️ Cuadros y protecciones"),
+  R("cuadroind","Cuadro industrial trifásico","ud",950,8,"🛡️ Cuadros y protecciones"),
+  R("magneto","Magnetotérmico","ud",18,.3,"🛡️ Cuadros y protecciones"),
+  R("diferencial","Diferencial","ud",45,.4,"🛡️ Cuadros y protecciones"),
+  R("difsi","Diferencial superinmunizado","ud",95,.4,"🛡️ Cuadros y protecciones"),
+  R("sobretension","Protector de sobretensiones","ud",110,.5,"🛡️ Cuadros y protecciones"),
+  // 🔌 Cableado
+  R("cable","Cableado y canalización (por metro)","m",5.6,.08,"🔌 Cableado"),
+  R("cable25","Línea 2,5 mm² (m)","m",3.2,.06,"🔌 Cableado"),
+  R("cable10","Línea 10 mm² (m)","m",8.4,.09,"🔌 Cableado"),
+  R("bandeja","Bandeja rejilla (m)","m",12,.15,"🔌 Cableado"),
+  R("manguera5g6","Manguera 5G6 (m)","m",6.8,.08,"🔌 Cableado"),
+  // 💡 Iluminación
+  R("downlight","Downlight LED","ud",22,.35,"💡 Iluminación"),
+  R("panelled","Panel LED 60×60","ud",34,.4,"💡 Iluminación"),
+  R("campana","Campana industrial LED 150 W","ud",145,1,"💡 Iluminación"),
+  R("tiraled","Tira LED con perfil (m)","m",28,.5,"💡 Iluminación"),
+  R("detector","Detector de presencia","ud",42,.5,"💡 Iluminación"),
+  R("emergencia","Luz de emergencia","ud",38,.4,"💡 Iluminación"),
+  // 🏠 Domótica
+  R("termostato","Termostato WiFi","ud",120,1,"🏠 Domótica"),
+  R("persianamot","Motorización de persiana","ud",180,1.5,"🏠 Domótica"),
+  R("enchufeint","Enchufe inteligente","ud",35,.2,"🏠 Domótica"),
+  R("videoportero","Videoportero WiFi","ud",420,3.5,"🏠 Domótica"),
+  // 🚗 Vehículo eléctrico
+  R("cargador","Cargador coche eléctrico (wallbox)","ud",750,4,"🚗 Vehículo eléctrico"),
+  R("cargador3f","Wallbox trifásico 11 kW","ud",1150,5,"🚗 Vehículo eléctrico"),
+  R("protecve","Protecciones línea VE","ud",190,1.5,"🚗 Vehículo eléctrico"),
+  R("subvencionve","Tramitación subvención (MOVES)","ud",180,0,"🚗 Vehículo eléctrico"),
+  // 📡 Telecomunicaciones
+  R("antena","Antena TDT + mástil","ud",260,3,"📡 Telecomunicaciones"),
+  R("amplificador","Amplificador de señal","ud",95,1,"📡 Telecomunicaciones"),
+  R("camara","Cámara CCTV instalada","ud",160,1.5,"📡 Telecomunicaciones"),
+  R("kitcctv","Kit 4 cámaras + grabador","ud",640,6,"📡 Telecomunicaciones"),
+  // 👷 Mano de obra
+  R("hora","Mano de obra (hora)","h",30,0,"👷 Mano de obra",true),
+  R("horaof2","Hora oficial 2ª","h",26,0,"👷 Mano de obra",true),
+  R("jornada","Mano de obra (jornada operario)","jorn",240,0,"👷 Mano de obra",true),
+  R("jornadapareja","Jornada pareja (2 operarios)","jorn",460,0,"👷 Mano de obra",true),
+  R("horafestiva","Hora festiva / nocturna","h",45,0,"👷 Mano de obra",true),
+  R("desplazamiento","Desplazamiento / aviso","ud",45,0,"👷 Mano de obra",true),
+  R("urgencia","Salida urgente (24 h)","ud",90,0,"👷 Mano de obra",true),
+  // 🧰 Maquinaria
+  R("plataforma","Plataforma elevadora (día)","día",210,0,"🧰 Maquinaria",true),
+  R("andamio","Andamio (día)","día",90,0,"🧰 Maquinaria",true),
+  R("generador","Grupo electrógeno (día)","día",120,0,"🧰 Maquinaria",true),
+  // 🔧 Mantenimientos
+  R("mantfv","Mantenimiento anual fotovoltaica","ud",180,3,"🔧 Mantenimientos",true),
+  R("revclima","Revisión anual climatización","ud",95,1.5,"🔧 Mantenimientos",true),
+  R("revcuadro","Revisión de cuadro + termografía","ud",140,2,"🔧 Mantenimientos",true)
   ];
 }
 /* ================= PLANTILLAS DE PRESUPUESTO ================= */
@@ -250,7 +325,31 @@ const eur = n => (isNaN(n)?0:n).toLocaleString("es-ES",{style:"currency",currenc
 const esc = s => String(s ?? "").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const hoy = () => new Date().toISOString().slice(0,10);
 const fFecha = f => { if(!f) return ""; const [a,m,d]=f.split("-"); return `${d}/${m}/${a}`; };
-function marcarCambio(){ cambiosSinGuardar = true; }
+/* ===== Guardado automático (si el navegador lo permite) ===== */
+const CLAVE_ALMACEN = "presuvolt-datos";
+const almacen = (() => { try { localStorage.setItem("__pv","1"); localStorage.removeItem("__pv"); return localStorage; } catch(e){ return null; } })();
+function migrar(d){
+  if (!Array.isArray(d.partes)) d.partes = [];
+  if (!Array.isArray(d.clientes)) d.clientes = [];
+  if (!Array.isArray(d.diario)) d.diario = [];
+  if (!d.config.prefijoParte) d.config.prefijoParte = "PT";
+  const ref = preciosReferencia();
+  d.precios.forEach(p => {
+    if (!p.fam || p.tiempo == null){
+      const r = ref.find(x => x.k === p.k);
+      if (r){ p.fam = p.fam || r.fam; if (p.tiempo == null) p.tiempo = r.tiempo; }
+      else { p.fam = p.fam || "📦 General"; if (p.tiempo == null) p.tiempo = 0; }
+    }
+  });
+  ref.forEach(r => { if (!d.precios.some(p => p.k === r.k)) d.precios.push(r); }); // nuevas referencias al actualizar la app
+  return d;
+}
+let tGuardar = null;
+function guardarLocal(){ if (!almacen) return; try { almacen.setItem(CLAVE_ALMACEN, JSON.stringify(state)); } catch(e){} }
+function marcarCambio(){ cambiosSinGuardar = !almacen; clearTimeout(tGuardar); tGuardar = setTimeout(guardarLocal, 400); }
+if (almacen){
+  try { const d = JSON.parse(almacen.getItem(CLAVE_ALMACEN)); if (d && d.config && Array.isArray(d.precios)) state = migrar(d); } catch(e){}
+}
 window.addEventListener("beforeunload", e => {
   if (cambiosSinGuardar && state.presupuestos.length){ e.preventDefault(); e.returnValue = ""; }
 });
@@ -285,7 +384,7 @@ function analizar(texto){
     const it = precioDe(k);
     if (!it || usado.has(k)) return;
     usado.add(k);
-    lineas.push({concepto: nombreExtra || it.nombre, cant: Math.max(cant||1, 0.5), unidad: it.unidad, precio: it.precio, esMO: !!it.esMO});
+    lineas.push({concepto: nombreExtra || it.nombre, cant: Math.max(cant||1, 0.5), unidad: it.unidad, precio: it.precio, tiempo: it.tiempo||0, esMO: !!it.esMO});
   };
   let m;
   // Paneles / placas / módulos (con potencia opcional "de 550")
@@ -471,7 +570,7 @@ function totales(p){
   return {coste, venta, iva, total: venta + iva, beneficio: venta - coste};
 }
 /* ================= NAVEGACIÓN ================= */
-const PESTANAS = [["nota","Nueva nota","🎤","Nota"],["lista","Presupuestos","📋","Presup."],["partes","Partes","🛠️","Partes"],["precios","Mis precios","💶","Precios"],["ajustes","Ajustes","⚙️","Ajustes"]];
+const PESTANAS = [["nota","Nueva nota","🎤","Nota"],["lista","Presupuestos","📋","Presup."],["partes","Partes","🛠️","Partes"],["asistente","Copiloto","🤖","Copiloto"],["precios","Mis precios","💶","Precios"],["ajustes","Ajustes","⚙️","Ajustes"]];
 function irA(v){
   if (vista === "editor" && editando && !confirmarSalida()) return;
   vista = v; editando = null; filtro = ""; render(); window.scrollTo(0,0);
@@ -479,8 +578,10 @@ function irA(v){
 function confirmarSalida(){ return confirm("Tienes un presupuesto sin guardar. ¿Salir sin guardarlo?"); }
 function pintarNav(){
   const act = vista === "editor" ? "nota" : vista;
-  $("#nav").innerHTML = PESTANAS.map(([k,t]) => `<button class="${act===k?"activo":""}" onclick="irA('${k}')">${t}</button>`).join("");
-  $("#nav-movil").innerHTML = PESTANAS.map(([k,t,ico,corto]) => `<button class="${act===k?"activo":""}" onclick="irA('${k}')"><span class="ico">${ico}</span>${corto}</button>`).join("");
+  const n = avisosAsistente().length;
+  const badge = k => (k === "asistente" && n) ? `<span class="badge">${n}</span>` : "";
+  $("#nav").innerHTML = PESTANAS.map(([k,t]) => `<button class="${act===k?"activo":""}" onclick="irA('${k}')" style="position:relative">${t}${badge(k)}</button>`).join("");
+  $("#nav-movil").innerHTML = PESTANAS.map(([k,t,ico,corto]) => `<button class="${act===k?"activo":""}" onclick="irA('${k}')" style="position:relative"><span class="ico">${ico}</span>${corto}${badge(k)}</button>`).join("");
 }
 function render(){
   pintarNav();
@@ -489,10 +590,12 @@ function render(){
   else if (vista === "editor") app.innerHTML = htmlEditor();
   else if (vista === "lista") app.innerHTML = htmlLista("presu");
   else if (vista === "partes") app.innerHTML = htmlPartesTab();
+  else if (vista === "asistente") app.innerHTML = htmlAsistente();
   else if (vista === "precios") app.innerHTML = htmlPrecios();
   else app.innerHTML = htmlAjustes();
 }
 function avisoDatos(){
+  if (almacen) return `<div class="aviso" style="background:#f0fdf4;border-color:#86efac;color:#14532d">✅ Guardado automático activado: tus datos se conservan en este dispositivo. Descarga una <strong>💾 Copia</strong> de vez en cuando por seguridad.</div>`;
   return `<div class="aviso">⚡ Los datos viven solo en esta sesión. Usa <strong>💾 Copia</strong> (arriba) para descargar tu archivo de datos y <strong>📂 Cargar</strong> al volver a abrir la app.</div>`;
 }
 /* ================= PANTALLA: NUEVA NOTA ================= */
@@ -577,9 +680,12 @@ function htmlEditor(){
     </div>
   </div>`;
 }
+function horasEstimadas(p){ return Math.round((p.lineas||[]).reduce((s,l) => s + (+l.cant||0)*(+l.tiempo||0), 0)*10)/10; }
 function htmlTotales(t,p){
+  const he = horasEstimadas(p);
   let h = `<div class="fila privado"><span>Coste (privado)</span><span>${eur(t.coste)}</span></div>
     <div class="fila privado"><span>Beneficio (privado)</span><span>${eur(t.beneficio)}</span></div>
+    ${he ? `<div class="fila privado"><span>⏱️ Tiempo estimado</span><span>${he} h ≈ ${Math.max(1,Math.ceil(he/8))} jorn.</span></div>` : ""}
     <div class="fila"><span>Venta sin IVA</span><span>${eur(t.venta)}</span></div>`;
   if (p.conIva) h += `<div class="fila"><span>IVA (${p.iva}%)</span><span>${eur(t.iva)}</span></div>`;
   return h + `<div class="fila total"><span>TOTAL${p.conIva?"":" (IVA no incl.)"}</span><span>${eur(t.total)}</span></div>`;
@@ -615,10 +721,66 @@ function abrirSelectorPrecio(){
 }
 function anadirDeBase(i){
   const it = state.precios[i];
-  editando.lineas.push({concepto: it.nombre, cant: 1, unidad: it.unidad, precio: it.precio, esMO: !!it.esMO});
+  editando.lineas.push({concepto: it.nombre, cant: 1, unidad: it.unidad, precio: it.precio, tiempo: it.tiempo||0, esMO: !!it.esMO});
   cerrarModal(); render();
 }
 function cerrarModal(){ $("#modal").innerHTML = ""; }
+/* ================= COPILOTO: AVISOS PROACTIVOS ================= */
+const amin = h => { const [a,b] = String(h||"0:0").split(":"); return (+a)*60+(+b||0); };
+const diasDesde = f => Math.max(0, Math.round((Date.parse(hoy()) - Date.parse(f)) / 864e5));
+function avisosAsistente(){
+  const avisos = [];
+  // ---- diario: huecos, jornadas cortas, entradas sin cliente ----
+  const porDia = {};
+  (state.diario||[]).forEach(e => { (porDia[e.fecha] = porDia[e.fecha] || []).push(e); });
+  Object.entries(porDia).forEach(([f, ents]) => {
+    ents.sort((a,b) => a.desde.localeCompare(b.desde));
+    for (let i = 1; i < ents.length; i++){
+      const hueco = amin(ents[i].desde) - amin(ents[i-1].hasta);
+      if (hueco >= 30) avisos.push({ico:"⏳", txt:`Hueco de ${Math.round(hueco/6)/10} h el ${fFecha(f)} entre las ${ents[i-1].hasta} y las ${ents[i].desde}. ¿Falta un tramo por apuntar?`, v:"partes"});
+    }
+    const th = ents.reduce((s,e) => s + (+e.horas||0), 0);
+    if (f !== hoy() && th > 0 && th < 6) avisos.push({ico:"📅", txt:`La jornada del ${fFecha(f)} solo tiene ${Math.round(th*10)/10} h apuntadas. ¿Está completa?`, v:"partes"});
+    ents.filter(e => !e.clienteId).forEach(e => avisos.push({ico:"👤", txt:`La entrada del ${fFecha(f)} a las ${e.desde} no tiene cliente asignado.`, v:"partes"}));
+  });
+  // ---- partes valorados ----
+  (state.partes||[]).forEach(p => {
+    if (p.estado === "pendiente" && diasDesde(p.fecha) > 15) avisos.push({ico:"💶", txt:`El parte ${p.numero} lleva ${diasDesde(p.fecha)} días pendiente de facturar${p.cliente?" ("+p.cliente+")":""}.`, id:p.id});
+    if (!p.firma) avisos.push({ico:"✍️", txt:`El parte ${p.numero} no tiene la firma del cliente.`, id:p.id});
+  });
+  // ---- presupuestos ----
+  (state.presupuestos||[]).forEach(p => {
+    const d = diasDesde(p.fecha);
+    if (p.estado === "borrador" && d > 7) avisos.push({ico:"📋", txt:`El presupuesto ${p.numero} lleva ${d} días en borrador sin enviar.`, id:p.id});
+    if (p.estado === "enviado" && d > 15) avisos.push({ico:"📞", txt:`Enviaste el ${p.numero} hace ${d} días${p.cliente?" a "+p.cliente:""}. Toca hacer seguimiento antes de que se enfríe.`, id:p.id});
+    const lin = p.lineas || [];
+    if (lin.some(l => !l.esMO && l.concepto) && !lin.some(l => l.esMO)){
+      const he = horasEstimadas(p);
+      avisos.push({ico:"👷", txt:`El presupuesto ${p.numero} no incluye mano de obra.${he ? ` Por los materiales, estimo ${he} h (≈ ${Math.max(1,Math.ceil(he/8))} jornadas).` : ""}`, id:p.id});
+    }
+    if (lin.some(l => /Módulo FV/i.test(l.concepto)) && !lin.some(l => /Legalizaci/i.test(l.concepto)))
+      avisos.push({ico:"📄", txt:`El ${p.numero} es de fotovoltaica pero no incluye legalización (RD 244/2019).`, id:p.id});
+    if (lin.some(l => /wallbox|cargador/i.test(l.concepto)) && !lin.some(l => /protec/i.test(l.concepto)))
+      avisos.push({ico:"🛡️", txt:`El ${p.numero} lleva cargador de VE pero no veo protecciones de la línea.`, id:p.id});
+  });
+  // ---- clientes ----
+  (state.clientes||[]).filter(c => c.autoCreado && !c.telefono).forEach(c =>
+    avisos.push({ico:"📱", txt:`Al cliente «${c.nombre}» (creado desde el diario) le falta el teléfono para poder enviarle documentos por WhatsApp.`, v:"partes"}));
+  return avisos;
+}
+function htmlAsistente(){
+  const avisos = avisosAsistente();
+  const filas = avisos.map((a,i) => `<div class="dia-entrada" style="grid-template-columns:40px 1fr auto">
+    <div style="font-size:22px;text-align:center">${a.ico}</div>
+    <div class="dia-txt">${a.txt}</div>
+    <div>${a.id ? `<button class="btn sec mini" onclick="abrir('${a.id}')">Abrir</button>` : a.v ? `<button class="btn sec mini" onclick="irA('${a.v}')">Ver</button>` : ""}</div>
+  </div>`).join("");
+  return `<div class="tarjeta">
+    <div class="fila-titulo"><h2>🤖 Tu copiloto</h2><span class="chip ${avisos.length?"pendiente":"aceptado"}">${avisos.length ? avisos.length + " avisos" : "todo en orden"}</span></div>
+    <p style="color:var(--gris);font-size:.92rem;margin-bottom:14px">Reviso tu trabajo continuamente: huecos en el diario, partes sin firmar o sin facturar, presupuestos a los que les falta algo o que se están enfriando, y clientes con datos incompletos.</p>
+    ${filas || `<div class="vacio"><strong>✅ Todo en orden</strong><p>No he detectado nada pendiente. Cuando registres partes y presupuestos, iré avisándote aquí de lo que se te escape.</p></div>`}
+  </div>`;
+}
 /* ================= PESTAÑA PARTES (diario + valorados) ================= */
 function htmlPartesTab(){
   const toggle = `<div style="display:flex;gap:8px;margin-bottom:14px">
@@ -677,7 +839,7 @@ function aplicarPlantilla(ci, si){
   const cat = PLANTILLAS[ci], sub = cat.subs[si];
   const lineas = sub.lineas.map(([k, cant]) => {
     const it = precioDe(k);
-    return it ? {concepto: it.nombre, cant, unidad: it.unidad, precio: it.precio, esMO: !!it.esMO} : null;
+    return it ? {concepto: it.nombre, cant, unidad: it.unidad, precio: it.precio, tiempo: it.tiempo||0, esMO: !!it.esMO} : null;
   }).filter(Boolean);
   editando = {id: uid(), tipo: "presu", numero: siguienteNumero("presu"), fecha: hoy(), cliente:"", telefono:"", obra:"",
     nota: "", categoria: cat.cat.replace(/^\S+\s/,"") + " · " + sub.nombre, lineas,
@@ -733,21 +895,37 @@ function borrar(id){
   marcarCambio(); render();
 }
 /* ================= PANTALLA: PRECIOS ================= */
+let famSel = "todas";
 function htmlPrecios(){
-  const lista = state.precios.map((it,i)=>`<div class="precio-fila">
+  const fams = [...new Set(state.precios.map(p => p.fam || "📦 General"))];
+  const txt = normalizar(filtro);
+  const visibles = state.precios.map((it,i)=>({it,i}))
+    .filter(({it}) => (famSel === "todas" || (it.fam||"📦 General") === famSel) && (!txt || normalizar(it.nombre).includes(txt)));
+  const grupos = {};
+  visibles.forEach(v => { const f = v.it.fam || "📦 General"; (grupos[f] = grupos[f] || []).push(v); });
+  const fila = ({it,i}) => `<div class="precio-fila">
     <input value="${esc(it.nombre)}" oninput="state.precios[${i}].nombre=this.value;marcarCambio()">
     <input value="${esc(it.unidad)}" oninput="state.precios[${i}].unidad=this.value;marcarCambio()">
     <input type="number" step="0.01" min="0" value="${esc(it.precio)}" oninput="state.precios[${i}].precio=+this.value||0;state.precios[${i}].ref=false;marcarCambio();this.parentElement.querySelector('.chip').outerHTML='<span class=\\'chip mio\\'>tu precio</span>'">
+    <input type="number" step="0.1" min="0" title="Horas de instalación por unidad" value="${esc(it.tiempo||0)}" oninput="state.precios[${i}].tiempo=+this.value||0;marcarCambio()">
     <span class="chip ${it.ref?"ref":"mio"}">${it.ref?"referencia":"tu precio"}</span>
     <button class="btn-icono" onclick="if(confirm('¿Quitar este material de tu base?')){state.precios.splice(${i},1);marcarCambio();render()}">✕</button>
-  </div>`).join("");
+  </div>`;
+  const cuerpo = Object.entries(grupos).map(([f, items]) => `
+    <div style="font-family:'Barlow Semi Condensed';font-weight:700;text-transform:uppercase;font-size:.85rem;letter-spacing:.5px;margin:16px 0 8px;border-bottom:2px solid var(--grafito);padding-bottom:4px">${f} <span style="color:var(--gris);font-weight:600">(${items.length})</span></div>
+    ${items.map(fila).join("")}`).join("");
   return avisoDatos() + `<div class="tarjeta">
-    <div class="fila-titulo"><h2>Mis precios</h2>
+    <div class="fila-titulo"><h2>Mis precios <span style="color:var(--gris);font-size:.85rem;font-family:'Barlow'">(${state.precios.length} referencias)</span></h2>
       <button class="btn sec mini" onclick="if(confirm('Esto restaura la base de precios de referencia y pierde tus cambios de precios. ¿Seguir?')){state.precios=preciosReferencia();marcarCambio();render()}">↺ Restaurar referencia</button></div>
-    <p style="color:var(--gris);font-size:.92rem;margin-bottom:14px">Toca un precio y ponlo al tuyo: pasa de «referencia» a «tu precio». El analizador de notas usa esta base. 🔒 Nadie más ve tus precios.</p>
-    <div class="precio-fila" style="margin-bottom:6px"><label>Material / concepto</label><label>Ud.</label><label>Coste €</label><label></label><label></label></div>
-    ${lista}
-    <button class="btn sec mini" style="margin-top:6px" onclick="state.precios.push({k:'x'+Date.now(),nombre:'',unidad:'ud',precio:0,ref:false,esMO:false});marcarCambio();render()">+ Añadir material</button>
+    <p style="color:var(--gris);font-size:.9rem;margin-bottom:12px">Toca un precio y ponlo al tuyo. La columna ⏱️ son las horas de instalación por unidad — con ellas calculo el tiempo estimado de cada presupuesto. 🔒 Nadie más ve tus precios.</p>
+    <input class="buscador" style="max-width:100%;margin-bottom:10px" placeholder="🔍 Buscar material…" value="${esc(filtro)}" oninput="filtroInput(this)">
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px">
+      <button class="btn ${famSel==="todas"?"amarillo":"sec"} mini" onclick="famSel='todas';render()">Todas</button>
+      ${fams.map(f => `<button class="btn ${famSel===f?"amarillo":"sec"} mini" onclick="famSel='${esc(f)}';render()">${f}</button>`).join("")}
+    </div>
+    <div class="precio-fila" style="margin-bottom:0"><label>Material / concepto</label><label>Ud.</label><label>Coste €</label><label>⏱️ h/ud</label><label></label><label></label></div>
+    ${cuerpo || `<div class="vacio">Sin resultados para esa búsqueda.</div>`}
+    <button class="btn sec mini" style="margin-top:12px" onclick="state.precios.push({k:'x'+Date.now(),nombre:'',unidad:'ud',precio:0,tiempo:0,fam:'📦 General',ref:false,esMO:false});famSel='📦 General';filtro='';marcarCambio();render()">+ Añadir material</button>
   </div>`;
 }
 /* ================= PANTALLA: AJUSTES ================= */
@@ -899,11 +1077,7 @@ function importarDatos(ev){
     try{
       const d = JSON.parse(r.result);
       if (!d.config || !Array.isArray(d.precios)) throw new Error("formato");
-      if (!Array.isArray(d.partes)) d.partes = [];
-      if (!Array.isArray(d.clientes)) d.clientes = [];
-      if (!Array.isArray(d.diario)) d.diario = [];
-      if (!d.config.prefijoParte) d.config.prefijoParte = "PT";
-      state = d; cambiosSinGuardar = false; editando = null;
+      state = migrar(d); guardarLocal(); cambiosSinGuardar = false; editando = null;
       render();
     } catch { alert("El archivo no es una copia de PresuVolt válida."); }
   };
