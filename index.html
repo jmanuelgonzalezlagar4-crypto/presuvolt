@@ -67,6 +67,10 @@
   .dia-txt{font-size:.95rem;line-height:1.35}
   .dia-meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:5px}
   .dia-acciones{display:flex;flex-direction:column;gap:2px}
+  .kpis-mes{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+  .kpis-mes>div{background:var(--grafito);color:var(--papel);border-radius:10px;padding:10px 8px;text-align:center;display:flex;flex-direction:column;gap:1px}
+  .kpis-mes .v{font-family:'Barlow Semi Condensed';font-weight:800;font-size:1.02rem;color:var(--amarillo)}
+  .kpis-mes .l{font-size:.6rem;text-transform:uppercase;letter-spacing:.4px;color:#9a9da1;font-weight:600}
   .badge{position:absolute;top:4px;right:2px;background:#dc2626;color:#fff;border-radius:99px;font-size:.62rem;font-weight:700;min-width:17px;height:17px;display:flex;align-items:center;justify-content:center;padding:0 4px;font-family:'Barlow',sans-serif}
   /* ---- pantalla nota de voz ---- */
   .nota-hero{text-align:center;padding:8px 0 4px}
@@ -114,7 +118,7 @@
   .precio-fila input{padding:8px;font-size:15px}
   /* ---- nav inferior móvil ---- */
   #nav-movil{display:none;position:fixed;left:0;right:0;bottom:0;background:var(--grafito);z-index:60;justify-content:space-around;padding:5px 4px calc(5px + env(safe-area-inset-bottom))}
-  #nav-movil button{background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:1px;font-family:'Barlow Semi Condensed',sans-serif;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#9a9da1;padding:5px 12px;border-radius:10px;cursor:pointer}
+  #nav-movil button{background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:1px;font-family:'Barlow Semi Condensed',sans-serif;font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.3px;color:#9a9da1;padding:5px 5px;border-radius:10px;cursor:pointer}
   #nav-movil button.activo{color:var(--amarillo)}
   #nav-movil button .ico{font-size:21px;line-height:1.2}
   @media(max-width:640px){
@@ -575,7 +579,7 @@ function totales(p){
   return {coste, venta, iva, total: venta + iva, beneficio: venta - coste};
 }
 /* ================= NAVEGACIÓN ================= */
-const PESTANAS = [["nota","Nueva nota","🎤","Nota"],["lista","Presupuestos","📋","Presup."],["partes","Partes","🛠️","Partes"],["asistente","Copiloto","🤖","Copiloto"],["precios","Mis precios","💶","Precios"],["ajustes","Ajustes","⚙️","Ajustes"]];
+const PESTANAS = [["nota","Nueva nota","🎤","Nota"],["lista","Presupuestos","📋","Presup."],["partes","Partes","🛠️","Partes"],["clientes","Clientes","👥","Clientes"],["asistente","Copiloto","🤖","Avisos"],["precios","Mis precios","💶","Precios"],["ajustes","Ajustes","⚙️","Ajustes"]];
 function irA(v){
   if (vista === "editor" && editando && !confirmarSalida()) return;
   vista = v; editando = null; filtro = ""; render(); window.scrollTo(0,0);
@@ -595,6 +599,7 @@ function render(){
   else if (vista === "editor") app.innerHTML = htmlEditor();
   else if (vista === "lista") app.innerHTML = htmlLista("presu");
   else if (vista === "partes") app.innerHTML = htmlPartesTab();
+  else if (vista === "clientes") app.innerHTML = htmlClientesCRM();
   else if (vista === "asistente") app.innerHTML = htmlAsistente();
   else if (vista === "precios") app.innerHTML = htmlPrecios();
   else app.innerHTML = htmlAjustes();
@@ -605,7 +610,26 @@ function avisoDatos(){
 }
 /* ================= PANTALLA: NUEVA NOTA ================= */
 function htmlNota(){
-  return avisoDatos() + `<div class="tarjeta nota-hero">
+  const mes = hoy().slice(0,7);
+  const pMes = state.presupuestos.filter(p => (p.fecha||"").startsWith(mes));
+  const acept = pMes.filter(p => p.estado === "aceptado").reduce((s,p) => s + totales(p).total, 0);
+  const hMes = Math.round((state.diario||[]).filter(e => (e.fecha||"").startsWith(mes)).reduce((s,e) => s + (+e.horas||0), 0)*10)/10;
+  let racha = 0; { const dias = new Set((state.diario||[]).map(e => e.fecha)); const d = new Date();
+    if (!dias.has(hoy())) d.setDate(d.getDate()-1);
+    while (dias.has(d.toISOString().slice(0,10))){ racha++; d.setDate(d.getDate()-1); } }
+  const marcador = (pMes.length || hMes || racha) ? `<div class="kpis-mes">
+    <div><span class="v">${pMes.length}</span><span class="l">presup. este mes</span></div>
+    <div><span class="v">${eur(acept)}</span><span class="l">aceptados</span></div>
+    <div><span class="v">${hMes} h</span><span class="l">apuntadas</span></div>
+    <div><span class="v">${racha ? "🔥 " + racha : "—"}</span><span class="l">días de racha</span></div>
+  </div>` : "";
+  const obj = +state.config.objetivoMes || 0;
+  const barra = obj ? `<div style="background:#fff;border:1.5px solid var(--linea);border-radius:10px;padding:10px 14px;margin-bottom:14px">
+    <div style="display:flex;justify-content:space-between;font-size:.78rem;font-weight:700;text-transform:uppercase;font-family:'Barlow Semi Condensed'"><span>🎯 Objetivo del mes</span><span>${eur(acept)} / ${eur(obj)}</span></div>
+    <div style="background:#eee;border-radius:99px;height:12px;margin-top:6px;overflow:hidden"><div style="background:${acept>=obj?"var(--wa)":"var(--amarillo)"};height:100%;width:${Math.min(100,Math.round(acept/obj*100))}%;transition:width .6s"></div></div>
+    ${acept>=obj?`<div style="font-size:.8rem;margin-top:4px">🏆 ¡Objetivo cumplido! Sube el listón en Ajustes.</div>`:""}</div>` : "";
+  const btnSemana = `<div style="text-align:center;margin-bottom:14px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="btn sec mini" onclick="resumenSemana()">📤 Resumen de mi semana</button><button class="btn sec mini" onclick="abrirRespuestas()">💬 Respuestas rápidas</button></div>`;
+  return avisoDatos() + marcador + barra + btnSemana + `<div class="tarjeta nota-hero">
     <h2>Cuéntame la obra</h2>
     <p class="guia">Pulsa el botón y habla: describe una obra para presupuestarla, o cuéntame tu día con horarios («de 6 a 9 estuve en…») y lo apunto todo en tu diario de partes.</p>
     <button class="btn-voz ${grabando?"grabando":""}" id="btn-voz" onclick="toggleGrabacion()">${grabando?"⏹️":"🎤"}</button>
@@ -657,7 +681,8 @@ function htmlEditor(){
       <span style="display:flex;gap:6px;flex-wrap:wrap">${p.categoria?`<span class="chip mio">${esc(p.categoria)}</span>`:""}<span class="chip ${p.estado}">${p.estado}</span></span></div>
     ${p.sinReconocer ? `<div class="aviso">🤔 No he reconocido materiales en la nota. Añade las líneas a mano o revisa el texto en «Nueva nota».</div>` : ""}
     <div class="rejilla c3">
-      <div><label>Cliente</label><input list="lista-clientes" value="${esc(p.cliente)}" oninput="editando.cliente=this.value;autoTelefono()" placeholder="Nombre del cliente">
+      <div><label>Cliente ${soportaContactos()?`<button class="btn-icono" style="padding:0 4px;font-size:14px" title="Elegir de tus contactos" onclick="contactoAlEditor()">📇</button>`:""}</label>
+        <input list="lista-clientes" value="${esc(p.cliente)}" oninput="editando.cliente=this.value;autoTelefono()" placeholder="Nombre del cliente">
         <datalist id="lista-clientes">${state.clientes.map(c=>`<option value="${esc(c.nombre)}">`).join("")}</datalist></div>
       <div><label>Teléfono (para WhatsApp)</label><input value="${esc(p.telefono)}" oninput="editando.telefono=this.value" placeholder="6XX XXX XXX"></div>
       <div><label>Obra / dirección</label><input value="${esc(p.obra)}" oninput="editando.obra=this.value" placeholder="p. ej. Chalet en Villaviciosa"></div>
@@ -677,7 +702,13 @@ function htmlEditor(){
     <div class="caja-totales" id="totales">${htmlTotales(t,p)}</div>
     <p class="nota-privada">🔒 Coste, margen y beneficio son privados: el cliente solo ve los precios de venta.</p>
     <div style="margin-top:12px"><label>Observaciones para el cliente</label><textarea oninput="editando.observaciones=this.value">${esc(p.observaciones)}</textarea></div>
-    <div style="margin-top:12px"><label>Estado</label><select onchange="editando.estado=this.value" style="max-width:220px">
+    ${p.tipo === "parte" ? `<h3 class="sub">📷 Fotos de la obra</h3>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      ${(p.fotos||[]).map((f,fi)=>`<span style="position:relative"><img src="${f}" style="height:74px;border-radius:8px;border:1.5px solid var(--linea)"><button class="btn-icono" style="position:absolute;top:-6px;right:-6px;background:#fff;border:1px solid var(--linea);border-radius:50%;font-size:11px;padding:2px 5px" onclick="editando.fotos.splice(${fi},1);render()">✕</button></span>`).join("")}
+      <button class="btn sec mini" onclick="document.getElementById('foto-input').click()">📷 Añadir foto</button>
+      <input type="file" id="foto-input" accept="image/*" capture="environment" style="display:none" onchange="anadirFoto(event)">
+    </div>` : ""}
+    <div style="margin-top:12px"><label>Estado</label><select onchange="editando.estado=this.value;if(this.value==='aceptado'&&editando.tipo!=='parte')festejar(totales(editando).total)" style="max-width:220px">
       ${(p.tipo === "parte" ? ["pendiente","facturado"] : ["borrador","enviado","aceptado"]).map(e=>`<option value="${e}" ${p.estado===e?"selected":""}>${e[0].toUpperCase()+e.slice(1)}</option>`).join("")}</select></div>
     ${p.tipo === "parte" ? `<h3 class="sub">✍️ Firma del cliente</h3>
     <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
@@ -738,6 +769,173 @@ function anadirDeBase(i){
   cerrarModal(); render();
 }
 function cerrarModal(){ $("#modal").innerHTML = ""; }
+/* ================= RESPUESTAS RÁPIDAS WHATSAPP ================= */
+function respuestasDefecto(){
+  return [
+    {t:"Petición de presupuesto", m:"¡Claro que sí! Dime los detalles de lo que necesitas (tipo de instalación, medidas o potencia, y dónde es) y te preparo el presupuesto en un momento. 👍"},
+    {t:"Voy de camino", m:"¡Buenas! Voy de camino, llego en unos minutos. Cualquier cosa me escribes por aquí."},
+    {t:"Trabajo terminado", m:"Trabajo terminado ✅ Te dejo todo funcionando y recogido. Cualquier duda que te surja, aquí me tienes. ¡Gracias por confiar en nosotros!"},
+    {t:"Recordatorio de pago", m:"¡Buenas! Te recuerdo que tienes pendiente el pago del último trabajo. Cuando puedas me haces el ingreso o me dices y me paso. ¡Gracias!"},
+    {t:"Presupuesto enviado, ¿lo viste?", m:"¡Buenas! ¿Pudiste echarle un vistazo al presupuesto que te pasé? Si tienes cualquier duda o quieres ajustar algo, lo vemos sin compromiso. 😊"}
+  ];
+}
+function abrirRespuestas(){
+  const rs = state.config.respuestas || respuestasDefecto();
+  $("#modal").innerHTML = `<div style="position:fixed;inset:0;background:rgba(26,28,30,.55);display:flex;align-items:center;justify-content:center;z-index:100;padding:16px" onclick="if(event.target===this)cerrarModal()">
+    <div style="background:#fff;border-radius:12px;padding:18px;max-width:520px;width:100%;max-height:82vh;overflow:auto">
+      <h3 class="sub" style="margin-top:0">💬 Respuestas rápidas</h3>
+      <p style="color:var(--gris);font-size:.85rem;margin-bottom:10px">Toca una y se abre WhatsApp con el mensaje listo — solo eliges el chat y envías.</p>
+      ${rs.map((r,i)=>`<div class="dia-entrada" style="grid-template-columns:1fr auto" onclick="window.open('https://wa.me/?text='+encodeURIComponent(${JSON.stringify(r.m).replace(/"/g,"&quot;")}),'_blank')">
+        <div><strong>${esc(r.t)}</strong><div class="dia-txt" style="color:var(--gris);font-size:.82rem">${esc(r.m.slice(0,70))}…</div></div>
+        <span class="btn wa mini">Enviar</span></div>`).join("")}
+      <div class="pie-form"><button class="btn sec mini" onclick="cerrarModal()">Cerrar</button></div>
+    </div></div>`;
+}
+/* ================= RESUMEN SEMANAL / FOTOS / DESHACER / CELEBRACIÓN ================= */
+function resumenSemana(){
+  const desde = new Date(); desde.setDate(desde.getDate()-7);
+  const d0 = desde.toISOString().slice(0,10);
+  const h = Math.round((state.diario||[]).filter(e=>e.fecha>=d0).reduce((s,e)=>s+(+e.horas||0),0)*10)/10;
+  const ps = state.presupuestos.filter(p=>p.fecha>=d0);
+  const acept = state.presupuestos.filter(p=>p.estado==="aceptado"&&p.fecha>=d0).reduce((s,p)=>s+totales(p).total,0);
+  const pts = (state.partes||[]).filter(p=>p.fecha>=d0).length;
+  const txt = `📊 Mi semana en PresuVolt:\n⏱️ ${h} h trabajadas\n📋 ${ps.length} presupuestos hechos\n✅ ${eur(acept)} aceptados\n🛠️ ${pts} partes de trabajo`;
+  window.open("https://wa.me/?text=" + encodeURIComponent(txt), "_blank");
+}
+function anadirFoto(ev){
+  const f = ev.target.files[0]; if (!f) return;
+  const img = new Image();
+  img.onload = () => {
+    const c = document.createElement("canvas");
+    const esc = Math.min(1, 900 / Math.max(img.width, img.height));
+    c.width = img.width * esc; c.height = img.height * esc;
+    c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+    (editando.fotos = editando.fotos || []).push(c.toDataURL("image/jpeg", .6));
+    marcarCambio(); render();
+  };
+  img.src = URL.createObjectURL(f); ev.target.value = "";
+}
+let ultimoBorrado = null;
+function restaurarBorrado(){
+  if (!ultimoBorrado){ alert("No hay nada que recuperar."); return; }
+  coleccion(ultimoBorrado.tipo === "parte" ? "parte" : "presu").push(ultimoBorrado);
+  alert("↩️ Recuperado " + ultimoBorrado.numero);
+  ultimoBorrado = null; marcarCambio(); render();
+}
+function festejar(importe){
+  $("#modal").innerHTML = `<div style="position:fixed;inset:0;background:rgba(26,28,30,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:300;color:#fff;gap:10px" onclick="cerrarModal()">
+    <div style="font-size:72px;animation:pulso 1s infinite">🎉</div>
+    <div style="font-family:'Barlow Semi Condensed';font-weight:800;font-size:1.6rem;text-transform:uppercase">¡Presupuesto aceptado!</div>
+    <div style="font-family:'IBM Plex Mono';font-size:1.3rem;background:var(--amarillo);color:var(--grafito);padding:6px 18px;border-radius:6px;font-weight:600">+ ${eur(importe)}</div>
+    <div style="color:#9a9da1;font-size:.85rem">toca para seguir</div></div>`;
+  setTimeout(() => cerrarModal(), 2500);
+}
+/* ================= CONTACTOS DEL TELÉFONO ================= */
+const soportaContactos = () => ("contacts" in navigator && "select" in navigator.contacts);
+async function importarContactos(idCliente){
+  if (!soportaContactos()){ alert("Tu navegador no permite abrir los contactos. Funciona en Chrome para Android con la app instalada desde la web."); return; }
+  try {
+    const sel = await navigator.contacts.select(["name","tel","email"], {multiple: !idCliente});
+    let nuevos = 0, actualizados = 0;
+    sel.forEach(ct => {
+      const nombre = (ct.name && ct.name[0] || "").trim();
+      const tel = (ct.tel && ct.tel[0] || "").trim();
+      const email = (ct.email && ct.email[0] || "").trim();
+      if (idCliente){
+        const c = state.clientes.find(x => x.id === idCliente);
+        if (c){ if (nombre) c.nombre = nombre; if (tel) c.telefono = tel; if (email) c.email = email; c.autoCreado = false; actualizados++; }
+      } else if (nombre){
+        const ex = clientePorNombre(nombre);
+        if (ex){ if (tel && !ex.telefono) ex.telefono = tel; if (email && !ex.email) ex.email = email; actualizados++; }
+        else { state.clientes.push({id: uid(), nombre, telefono: tel, email, autoCreado: false}); nuevos++; }
+      }
+    });
+    marcarCambio(); render();
+    if (nuevos || actualizados) alert(`📇 Contactos: ${nuevos} cliente(s) nuevo(s), ${actualizados} actualizado(s). Ya tienen su botón de llamada y WhatsApp.`);
+  } catch(e){ /* cancelado por el usuario */ }
+}
+async function contactoAlEditor(){
+  if (!soportaContactos()){ alert("Los contactos solo están disponibles en Chrome para Android."); return; }
+  try {
+    const sel = await navigator.contacts.select(["name","tel"], {multiple:false});
+    if (sel[0]){
+      editando.cliente = (sel[0].name && sel[0].name[0]) || editando.cliente;
+      editando.telefono = (sel[0].tel && sel[0].tel[0]) || editando.telefono;
+      render();
+    }
+  } catch(e){}
+}
+/* ================= CRM DE CLIENTES ================= */
+let clienteSel = null;
+function docsDeCliente(c){
+  return [...state.presupuestos, ...(state.partes||[])].filter(p => p.cliente && clientePorNombre(p.cliente) === c)
+    .sort((a,b) => (b.fecha||"").localeCompare(a.fecha||""));
+}
+function htmlClientesCRM(){
+  const c = state.clientes.find(x => x.id === clienteSel);
+  if (c) return htmlFichaCliente(c);
+  const lista = state.clientes.filter(x => normalizar(x.nombre + " " + (x.telefono||"")).includes(normalizar(filtro)))
+    .sort((a,b) => a.nombre.localeCompare(b.nombre));
+  const cards = lista.map(x => {
+    const docs = docsDeCliente(x);
+    const total = docs.reduce((s,p) => s + totales(p).total, 0);
+    return `<div class="tarjeta-item" onclick="clienteSel='${x.id}';render()">
+      <div class="ti-cab"><span class="ti-cli">${esc(x.nombre)}</span>${x.autoCreado?`<span class="chip ref">auto</span>`:""}</div>
+      <div class="ti-sub">${esc(x.telefono||"sin teléfono")}${x.direccion?" · "+esc(x.direccion):""}</div>
+      <div class="ti-pie"><span class="ti-total">${eur(total)}</span><span class="chip mio">${docs.length} docs</span></div>
+    </div>`;
+  }).join("");
+  return avisoDatos() + `<div class="tarjeta">
+    <div class="fila-titulo"><h2>Clientes <span style="color:var(--gris);font-size:.85rem;font-family:'Barlow'">(${state.clientes.length})</span></h2>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <input class="buscador" placeholder="Buscar…" value="${esc(filtro)}" oninput="filtroInput(this)">
+        ${soportaContactos() ? `<button class="btn sec mini" onclick="importarContactos()">📇 Importar de contactos</button>` : ""}
+        <button class="btn amarillo mini" onclick="clienteSel=obtenerOCrearCliente('Nuevo cliente').cliente.id;render()">+ Nuevo</button>
+      </div></div>
+    ${cards || `<div class="vacio"><strong>Sin clientes aún</strong><p>Se crean solos al dictar partes y presupuestos, o añádelos aquí.</p></div>`}
+  </div>`;
+}
+function htmlFichaCliente(c){
+  const i = state.clientes.indexOf(c);
+  c.equipos = c.equipos || [];
+  const docs = docsDeCliente(c);
+  const dia = (state.diario||[]).filter(e => e.clienteId === c.id);
+  const horas = Math.round(dia.reduce((s,e) => s + (+e.horas||0), 0)*10)/10;
+  const filaDoc = p => `<div class="dia-entrada" style="grid-template-columns:1fr auto" onclick="abrir('${p.id}')">
+    <div><strong style="font-family:'IBM Plex Mono';font-size:.82rem">${esc(p.numero)}</strong> · ${fFecha(p.fecha)}${p.obra?" · "+esc(p.obra):""}
+      <div class="dia-meta"><span class="chip ${p.estado}">${p.estado}</span><span class="chip ref">${p.tipo==="parte"?"parte":"presupuesto"}</span></div></div>
+    <div class="ti-total">${eur(totales(p).total)}</div></div>`;
+  const filaEq = (eq,j) => `<div class="precio-fila" style="grid-template-columns:1fr 110px 70px 32px">
+    <input placeholder="Equipo (p. ej. Inversor Deye 5 kW)" value="${esc(eq.desc)}" oninput="state.clientes[${i}].equipos[${j}].desc=this.value;marcarCambio()">
+    <input type="date" value="${esc(eq.fecha||"")}" onchange="state.clientes[${i}].equipos[${j}].fecha=this.value;marcarCambio()">
+    <input type="number" min="0" title="Meses de garantía" placeholder="Gar." value="${esc(eq.garantiaMeses||"")}" oninput="state.clientes[${i}].equipos[${j}].garantiaMeses=+this.value||0;marcarCambio()">
+    <button class="btn-icono" onclick="state.clientes[${i}].equipos.splice(${j},1);marcarCambio();render()">✕</button></div>`;
+  const wa = telWhatsAppCli(c);
+  return `<div class="tarjeta">
+    <div class="fila-titulo"><h2>👤 ${esc(c.nombre)}</h2>
+      <div style="display:flex;gap:8px">
+        ${soportaContactos()?`<button class="btn sec mini" title="Rellenar desde tus contactos" onclick="importarContactos('${c.id}')">📇</button>`:""}
+        ${c.telefono?`<a class="btn sec mini" style="text-decoration:none" href="tel:${esc(String(c.telefono).replace(/\s/g,""))}">📞</a>`:""}
+        ${wa?`<a class="btn wa mini" style="text-decoration:none" href="https://wa.me/${wa}" target="_blank">💬</a>`:""}
+        <button class="btn sec mini" onclick="clienteSel=null;render()">← Volver</button>
+      </div></div>
+    <div class="rejilla c2">
+      <div><label>Nombre</label><input value="${esc(c.nombre)}" oninput="state.clientes[${i}].nombre=this.value;state.clientes[${i}].autoCreado=false;marcarCambio()"></div>
+      <div><label>Teléfono</label><input value="${esc(c.telefono||"")}" oninput="state.clientes[${i}].telefono=this.value;marcarCambio()"></div>
+      <div><label>Email</label><input value="${esc(c.email||"")}" oninput="state.clientes[${i}].email=this.value;marcarCambio()"></div>
+      <div><label>Dirección</label><input value="${esc(c.direccion||"")}" oninput="state.clientes[${i}].direccion=this.value;marcarCambio()"></div>
+    </div>
+    <div style="margin-top:10px"><label>Notas</label><textarea rows="2" oninput="state.clientes[${i}].notas=this.value;marcarCambio()">${esc(c.notas||"")}</textarea></div>
+    <h3 class="sub">🛡️ Equipos instalados y garantías</h3>
+    ${c.equipos.length?`<div class="precio-fila" style="grid-template-columns:1fr 110px 70px 32px;margin-bottom:2px"><label>Equipo</label><label>Instalado</label><label>Gar. (meses)</label><label></label></div>`:""}
+    ${c.equipos.map(filaEq).join("")}
+    <button class="btn sec mini" onclick="state.clientes[${i}].equipos.push({desc:'',fecha:'',garantiaMeses:24});marcarCambio();render()">+ Añadir equipo</button>
+    <h3 class="sub">📚 Historial (${docs.length} documentos · ${horas} h de diario)</h3>
+    ${docs.map(filaDoc).join("") || `<div class="vacio" style="padding:14px">Sin presupuestos ni partes todavía.</div>`}
+    <div class="pie-form"><button class="btn peligro mini" onclick="if(confirm('¿Eliminar este cliente? (sus documentos no se borran)')){state.clientes.splice(${i},1);clienteSel=null;marcarCambio();render()}">🗑️ Eliminar cliente</button></div>
+  </div>`;
+}
+function telWhatsAppCli(c){ let d = String((c&&c.telefono)||"").replace(/\D/g,""); if (d.length === 9) d = "34"+d; return d; }
 /* ================= COPILOTO: AVISOS PROACTIVOS ================= */
 const amin = h => { const [a,b] = String(h||"0:0").split(":"); return (+a)*60+(+b||0); };
 const diasDesde = f => Math.max(0, Math.round((Date.parse(hoy()) - Date.parse(f)) / 864e5));
@@ -778,7 +976,14 @@ function avisosAsistente(){
   });
   // ---- clientes ----
   (state.clientes||[]).filter(c => c.autoCreado && !c.telefono).forEach(c =>
-    avisos.push({ico:"📱", txt:`Al cliente «${c.nombre}» (creado desde el diario) le falta el teléfono para poder enviarle documentos por WhatsApp.`, v:"partes"}));
+    avisos.push({ico:"📱", txt:`Al cliente «${c.nombre}» (creado desde el diario) le falta el teléfono para poder enviarle documentos por WhatsApp.`, v:"clientes"}));
+  // ---- garantías ----
+  (state.clientes||[]).forEach(c => (c.equipos||[]).forEach(eq => {
+    if (!eq.fecha || !eq.garantiaMeses || !eq.desc) return;
+    const fin = new Date(eq.fecha); fin.setMonth(fin.getMonth() + (+eq.garantiaMeses));
+    const dias = Math.round((fin - Date.parse(hoy())) / 864e5);
+    if (dias <= 60) avisos.push({ico:"🛡️", txt:`La garantía de «${eq.desc}» de ${c.nombre} ${dias < 0 ? "venció hace " + (-dias) + " días" : "vence en " + dias + " días"}. Buen momento para ofrecerle revisión o mantenimiento.`, v:"clientes"});
+  }));
   return avisos;
 }
 function htmlAsistente(){
@@ -902,7 +1107,8 @@ function htmlLista(tipo){
 function filtroInput(el){ filtro = el.value; render(); const n = $(".buscador"); if(n){ n.focus(); n.setSelectionRange(n.value.length,n.value.length); } }
 function abrir(id){ editando = JSON.parse(JSON.stringify(buscarDoc(id))); vista = "editor"; render(); }
 function borrar(id){
-  if(!confirm("¿Eliminar este documento?")) return;
+  if(!confirm("¿Eliminar este documento? (podrás recuperar el último desde Ajustes)")) return;
+  ultimoBorrado = buscarDoc(id);
   state.presupuestos = state.presupuestos.filter(x=>x.id!==id);
   state.partes = (state.partes||[]).filter(x=>x.id!==id);
   marcarCambio(); render();
@@ -966,6 +1172,8 @@ function htmlAjustes(){
       <div><label>Margen % materiales</label><input type="number" step="1" min="0" value="${esc(state.config.margen)}" oninput="state.config.margen=+this.value||0;marcarCambio()"></div>
       <div><label>IVA %</label><input type="number" step="0.1" min="0" value="${esc(state.config.iva)}" oninput="state.config.iva=+this.value||0;marcarCambio()"></div>
       <div><label>Prefijo numeración</label><input value="${esc(state.config.prefijo)}" oninput="state.config.prefijo=this.value;marcarCambio()"></div>
+      <div><label>🎯 Objetivo mensual € (aceptados)</label><input type="number" min="0" value="${esc(state.config.objetivoMes||"")}" oninput="state.config.objetivoMes=+this.value||0;marcarCambio()" placeholder="p. ej. 6000"></div>
+      <div><label>↩️ Recuperar</label><button class="btn sec mini" style="width:100%" onclick="restaurarBorrado()">Último documento borrado</button></div>
     </div>
     <div style="margin-top:12px"><label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-family:'Barlow';font-size:.95rem;color:var(--grafito)"><input type="checkbox" style="width:auto" ${state.config.conIva?"checked":""} onchange="state.config.conIva=this.checked;marcarCambio()"> Incluir IVA en los totales por defecto</label></div>
     <div style="margin-top:12px"><label>Condiciones (pie del PDF)</label><textarea oninput="state.config.condiciones=this.value;marcarCambio()">${esc(state.config.condiciones)}</textarea></div>
