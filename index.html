@@ -60,6 +60,13 @@
   .chip.pendiente{background:#FFF3B8;color:#7a6200;border:1px solid var(--amarillo)}
   .chip.facturado{background:#eafaf0;color:var(--verde)}
   .firma-mini{max-height:70px;border:1.5px solid var(--linea);border-radius:6px;background:#fff;padding:4px}
+  .dia-entrada{display:grid;grid-template-columns:56px 1fr auto;gap:12px;align-items:center;border:1.5px solid var(--linea);border-radius:10px;padding:10px 12px;margin-bottom:8px;cursor:pointer;background:#fff}
+  .dia-entrada:hover{border-color:var(--amarillo);background:#FFFDF2}
+  .dia-hora{display:flex;flex-direction:column;align-items:center;font-family:'IBM Plex Mono',monospace;font-size:.78rem;font-weight:600;background:var(--grafito);color:var(--amarillo);border-radius:8px;padding:6px 4px}
+  .dia-flecha{color:#9a9da1;font-size:.7rem;line-height:1}
+  .dia-txt{font-size:.95rem;line-height:1.35}
+  .dia-meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:5px}
+  .dia-acciones{display:flex;flex-direction:column;gap:2px}
   /* ---- pantalla nota de voz ---- */
   .nota-hero{text-align:center;padding:8px 0 4px}
   .nota-hero p.guia{color:var(--gris);max-width:52ch;margin:0 auto 18px;font-size:.98rem}
@@ -189,18 +196,53 @@ function preciosReferencia(){
     {k:"legalizacion",nombre:"Legalización y tramitación RD 244/2019",unidad:"ud", precio:350, ref:true, esMO:false},
     {k:"jornada",  nombre:"Mano de obra (jornada operario)",      unidad:"jorn", precio:240, ref:true, esMO:true},
     {k:"hora",     nombre:"Mano de obra (hora)",                  unidad:"h",  precio:30,   ref:true, esMO:true},
-    {k:"desplazamiento",nombre:"Desplazamiento / aviso",          unidad:"ud", precio:45,   ref:true, esMO:true}
+    {k:"desplazamiento",nombre:"Desplazamiento / aviso",          unidad:"ud", precio:45,   ref:true, esMO:true},
+    {k:"bombasum", nombre:"Bomba sumergida",                      unidad:"ud", precio:680,  ref:true, esMO:false},
+    {k:"bombapres",nombre:"Grupo de presión",                     unidad:"ud", precio:420,  ref:true, esMO:false},
+    {k:"variador", nombre:"Variador de frecuencia solar",         unidad:"ud", precio:850,  ref:true, esMO:false},
+    {k:"puntoluz", nombre:"Punto de luz",                         unidad:"ud", precio:28,   ref:true, esMO:false},
+    {k:"enchufe",  nombre:"Punto de enchufe",                     unidad:"ud", precio:26,   ref:true, esMO:false},
+    {k:"cuadroind",nombre:"Cuadro industrial trifásico",          unidad:"ud", precio:950,  ref:true, esMO:false},
+    {k:"cargador", nombre:"Cargador coche eléctrico (wallbox)",   unidad:"ud", precio:750,  ref:true, esMO:false}
   ];
 }
+/* ================= PLANTILLAS DE PRESUPUESTO ================= */
+const PLANTILLAS = [
+  {cat:"☀️ Solar / Fotovoltaica", subs:[
+    {nombre:"Autoconsumo vivienda", lineas:[["panel",8],["inv5",1],["estructura",8],["cable",25],["cuadro",1],["legalizacion",1],["jornada",4]]},
+    {nombre:"Aislada (sin red)",    lineas:[["panel",8],["inv5",1],["bateria",2],["estructura",8],["cable",20],["cuadro",1],["jornada",4]]},
+    {nombre:"Industrial / nave",    lineas:[["panel",20],["inv10",1],["estructura",20],["cable",60],["cuadroind",1],["legalizacion",1],["jornada",8]]}
+  ]},
+  {cat:"💧 Bombeo", subs:[
+    {nombre:"Bombeo solar",     lineas:[["panel",6],["variador",1],["bombasum",1],["estructura",6],["cable",40],["cuadro",1],["jornada",3]]},
+    {nombre:"Bombeo normal",    lineas:[["bomba",1],["cable",30],["cuadro",1],["jornada",2]]},
+    {nombre:"Bomba sumergida",  lineas:[["bombasum",1],["cable",50],["cuadro",1],["jornada",2]]},
+    {nombre:"Grupo de presión", lineas:[["bombapres",1],["cable",10],["jornada",1]]}
+  ]},
+  {cat:"🏠 Vivienda", subs:[
+    {nombre:"Vivienda nueva",  lineas:[["puntoluz",25],["enchufe",30],["cuadro",1],["cable",80],["legalizacion",1],["jornada",10]]},
+    {nombre:"Reforma",         lineas:[["puntoluz",10],["enchufe",12],["cuadro",1],["cable",40],["jornada",5]]},
+    {nombre:"Avería / aviso",  lineas:[["desplazamiento",1],["hora",2]]}
+  ]},
+  {cat:"🏭 Nave industrial", subs:[
+    {nombre:"Instalación nueva", lineas:[["cuadroind",1],["puntoluz",20],["cable",120],["legalizacion",1],["jornada",12]]},
+    {nombre:"Reforma / ampliación", lineas:[["cuadroind",1],["cable",60],["jornada",6]]}
+  ]},
+  {cat:"🔌 Otros", subs:[
+    {nombre:"Cargador coche eléctrico", lineas:[["cargador",1],["cable",15],["magneto",1],["diferencial",1],["legalizacion",1],["jornada",1]]}
+  ]}
+];
 /* ================= ESTADO ================= */
 let state = {
   config: {empresa:{nombre:"",nif:"",telefono:"",email:"",logo:""}, margen:28, iva:21, conIva:false, prefijo:"PV", prefijoParte:"PT",
            condiciones:"Presupuesto válido 30 días. No incluye trabajos no especificados."},
   precios: preciosReferencia(),
   presupuestos: [],
-  partes: []
+  partes: [],
+  clientes: [],
+  diario: []
 };
-let vista = "nota", editando = null, filtro = "", cambiosSinGuardar = false, textoNota = "";
+let vista = "nota", editando = null, filtro = "", cambiosSinGuardar = false, textoNota = "", modoPartes = "diario";
 
 const $ = s => document.querySelector(s);
 const uid = () => "id" + Math.random().toString(36).slice(2,10) + Date.now().toString(36);
@@ -287,6 +329,19 @@ function analizar(texto){
   if (/legalizaci|boletin|tramitaci|memoria tecnica/.test(t)) add("legalizacion", 1);
   // Aviso / avería / desplazamiento
   if (/averia|aviso|desplazamiento/.test(t)) add("desplazamiento", 1);
+  // Bomba sumergida / grupo de presión / variador
+  if (/sumergid/.test(t)) add("bombasum", 1);
+  if (/grupo de presion|bomba de presion/.test(t)) add("bombapres", 1);
+  if (/variador/.test(t)) add("variador", 1);
+  // Puntos de luz y enchufes
+  m = t.match(new RegExp(PAT_NUM + "\\s*puntos? de luz"));
+  if (m) add("puntoluz", aNum(m[1]));
+  m = t.match(new RegExp(PAT_NUM + "\\s*(?:enchufes?|tomas?(?: de corriente)?)"));
+  if (m) add("enchufe", aNum(m[1]));
+  // Cargador coche eléctrico
+  if (/cargador|wallbox|punto de recarga/.test(t)) add("cargador", 1);
+  // Cuadro industrial si se habla de nave/trifásica
+  if (/cuadro/.test(t) && /nave|industrial|trifasic/.test(t)){ usado.delete("cuadro"); const i = lineas.findIndex(l=>l.concepto.includes("Cuadro nuevo")); if(i>=0) lineas.splice(i,1); add("cuadroind", 1); }
   // Mano de obra: "2 operarios ... 2 jornadas" | "N jornadas" | "N horas"
   m = t.match(new RegExp(PAT_NUM + "\\s*op\\w*[^.]{0,30}?" + PAT_NUM + "\\s*(?:jornadas?|dias?)"));
   if (m){
@@ -302,7 +357,109 @@ function analizar(texto){
   }
   return lineas;
 }
-/* ================= TOTALES (margen solo a materiales) ================= */
+/* ================= CLIENTES ================= */
+function capitalizar(s){ return String(s||"").trim().split(/\s+/).map(w => w ? w[0].toUpperCase()+w.slice(1) : w).join(" "); }
+function clientePorNombre(nombre){
+  const n = normalizar(nombre||"").trim();
+  if (!n) return null;
+  return state.clientes.find(c => { const cn = normalizar(c.nombre); return cn === n || cn.includes(n) || n.includes(cn); }) || null;
+}
+function obtenerOCrearCliente(nombre){
+  const existente = clientePorNombre(nombre);
+  if (existente) return {cliente: existente, nuevo: false};
+  const c = {id: uid(), nombre: capitalizar(nombre), telefono: "", autoCreado: true};
+  state.clientes.push(c); marcarCambio();
+  return {cliente: c, nuevo: true};
+}
+function nombreCliente(id){ const c = state.clientes.find(x=>x.id===id); return c ? c.nombre : ""; }
+/* ================= DIARIO POR VOZ ================= */
+const hhmm = min => String(Math.floor(min/60)%24).padStart(2,"0") + ":" + String(min%60).padStart(2,"0");
+function extraerCliente(desc){
+  const d = " " + desc + " ";
+  const limpiar = s => s.split(/\s+(?:a\s+por|para|que|donde|y\s+(?:luego|despues|ahora)|con\s+el|con\s+la)\s+/i)[0].replace(/\s+/g," ").trim();
+  let m = d.match(/(?:casa|almac[eé]n|obra|nave|finca|taller|tienda|bar|restaurante|cortijo|chalet|cooperativa)\s+(?:de\s+)?[^,.;]{3,45}/i);
+  if (m) return limpiar(m[0]);
+  m = d.match(/\b(?:en|para|donde)\s+(?:el\s+|la\s+|los\s+|las\s+)?([^,.;]{3,45})/i);
+  if (m) return limpiar(m[1]);
+  return "";
+}
+function analizarDia(texto){
+  const re = /(?:desde|de)\s+(?:las?\s+)?(\d{1,2})(?:[:.h](\d{2}))?\s*(?:h(?:oras)?\b)?\s*(?:hasta|a)\s+(?:las?\s+)?(\d{1,2})(?:[:.h](\d{2}))?/gi;
+  const marcas = []; let m;
+  while ((m = re.exec(texto))) marcas.push({i: m.index, fin: m.index + m[0].length, h1: +m[1], m1: +(m[2]||0), h2: +m[3], m2: +(m[4]||0)});
+  return marcas.map((mk, idx) => {
+    const hastaTxt = idx+1 < marcas.length ? marcas[idx+1].i : texto.length;
+    const desc = texto.slice(mk.fin, hastaTxt).replace(/^[\s,.:;yY]+|[\s,.:;y]+$/g, "").trim();
+    const d1 = mk.h1*60 + mk.m1;
+    let d2 = mk.h2*60 + mk.m2;
+    if (d2 <= d1) d2 += 12*60;                       // «de 10 a 2» → 10:00-14:00
+    return {desde: hhmm(d1), hasta: hhmm(d2), horas: Math.round((d2-d1)/6)/10, texto: desc, nombreCliente: extraerCliente(desc)};
+  }).filter(e => e.texto);
+}
+function registrarDia(){
+  const txt = ($("#texto-nota") ? $("#texto-nota").value : textoNota).trim();
+  if (!txt){ alert("Cuéntame tu día con horarios, por ejemplo: «De 6:00 a 9:00 arreglando un motor en almacén de ajos Manuel Pérez, de 9 a 10 en el almacén eléctrico…»"); return; }
+  const entradas = analizarDia(txt);
+  if (!entradas.length){ alert("No he encontrado tramos horarios. Usa el formato «de las 6:00 hasta las 9:00 …, de 9 a 10 …» y vuelve a intentarlo."); return; }
+  const fecha = hoy();
+  let nuevos = [];
+  entradas.forEach(e => {
+    let clienteId = "";
+    if (e.nombreCliente){
+      const r = obtenerOCrearCliente(e.nombreCliente);
+      clienteId = r.cliente.id;
+      if (r.nuevo) nuevos.push(r.cliente.nombre);
+    }
+    state.diario.push({id: uid(), fecha, desde: e.desde, hasta: e.hasta, horas: e.horas, texto: e.texto, clienteId, facturado: false});
+  });
+  marcarCambio();
+  textoNota = ""; modoPartes = "diario"; vista = "partes"; render(); window.scrollTo(0,0);
+  if (nuevos.length) setTimeout(() => alert("He creado " + nuevos.length + " cliente(s) nuevo(s): " + nuevos.join(", ") + ". Puedes corregir el nombre tocando la entrada."), 100);
+}
+function borrarEntradaDia(id){ if(!confirm("¿Eliminar esta entrada del diario?")) return; state.diario = state.diario.filter(x=>x.id!==id); marcarCambio(); render(); }
+function editarEntradaDia(id){
+  const e = state.diario.find(x=>x.id===id); if(!e) return;
+  const ops = state.clientes.map(c=>`<option value="${c.id}" ${c.id===e.clienteId?"selected":""}>${esc(c.nombre)}</option>`).join("");
+  $("#modal").innerHTML = `<div style="position:fixed;inset:0;background:rgba(26,28,30,.55);display:flex;align-items:center;justify-content:center;z-index:100;padding:16px" onclick="if(event.target===this)cerrarModal()">
+    <div style="background:#fff;border-radius:12px;padding:18px;max-width:480px;width:100%">
+      <h3 class="sub" style="margin-top:0">Editar entrada</h3>
+      <div class="rejilla c2">
+        <div><label>Desde</label><input type="time" id="ed-desde" value="${esc(e.desde)}"></div>
+        <div><label>Hasta</label><input type="time" id="ed-hasta" value="${esc(e.hasta)}"></div>
+      </div>
+      <div style="margin-top:10px"><label>Qué hiciste</label><textarea id="ed-texto" rows="3">${esc(e.texto)}</textarea></div>
+      <div style="margin-top:10px"><label>Cliente</label><select id="ed-cliente"><option value="">— Sin cliente —</option>${ops}</select></div>
+      <div style="margin-top:10px"><label>Nombre del cliente (corregir)</label><input id="ed-nombre" value="${esc(nombreCliente(e.clienteId))}" placeholder="Escribe el nombre correcto"></div>
+      <div class="pie-form">
+        <button class="btn sec mini" onclick="cerrarModal()">Cancelar</button>
+        <button class="btn amarillo mini" onclick="guardarEntradaDia('${e.id}')">💾 Guardar</button>
+      </div></div></div>`;
+}
+function guardarEntradaDia(id){
+  const e = state.diario.find(x=>x.id===id); if(!e) return;
+  e.desde = $("#ed-desde").value || e.desde;
+  e.hasta = $("#ed-hasta").value || e.hasta;
+  const [a,b] = [e.desde,e.hasta].map(x=>{const [h,mn]=x.split(":");return (+h)*60+(+mn);});
+  e.horas = Math.max(Math.round(((b<=a?b+720:b)-a)/6)/10, 0);
+  e.texto = $("#ed-texto").value.trim();
+  const sel = $("#ed-cliente").value, nom = $("#ed-nombre").value.trim();
+  if (nom){
+    if (sel){ const c = state.clientes.find(x=>x.id===sel); if (c) c.nombre = capitalizar(nom); e.clienteId = sel; }
+    else e.clienteId = obtenerOCrearCliente(nom).cliente.id;
+  } else e.clienteId = sel;
+  marcarCambio(); cerrarModal(); render();
+}
+function diarioAParte(id){
+  const e = state.diario.find(x=>x.id===id); if(!e) return;
+  const it = precioDe("hora");
+  editando = {id: uid(), tipo: "parte", numero: siguienteNumero("parte"), fecha: e.fecha,
+    cliente: nombreCliente(e.clienteId), telefono: (state.clientes.find(c=>c.id===e.clienteId)||{}).telefono||"", obra: "",
+    nota: e.texto, lineas: [{concepto: e.texto.slice(0,80) || "Trabajos realizados", cant: e.horas||1, unidad:"h", precio: it?it.precio:30, esMO:true}],
+    margen: state.config.margen, iva: state.config.iva, conIva: state.config.conIva,
+    estado: "pendiente", firma:"", observaciones:"", sinReconocer:false, diarioId: e.id};
+  e.facturado = true;
+  vista = "editor"; render(); window.scrollTo(0,0);
+}
 function ventaLinea(l, margen){
   const base = (+l.cant||0) * (+l.precio||0);
   return l.esMO ? base : base * (1 + (+margen||0)/100);
@@ -331,7 +488,7 @@ function render(){
   if (vista === "nota") app.innerHTML = htmlNota();
   else if (vista === "editor") app.innerHTML = htmlEditor();
   else if (vista === "lista") app.innerHTML = htmlLista("presu");
-  else if (vista === "partes") app.innerHTML = htmlLista("parte");
+  else if (vista === "partes") app.innerHTML = htmlPartesTab();
   else if (vista === "precios") app.innerHTML = htmlPrecios();
   else app.innerHTML = htmlAjustes();
 }
@@ -342,15 +499,19 @@ function avisoDatos(){
 function htmlNota(){
   return avisoDatos() + `<div class="tarjeta nota-hero">
     <h2>Cuéntame la obra</h2>
-    <p class="guia">Pulsa el botón y descríbela como se la contarías a un compañero: qué instalación es, cuántos paneles, metros de tirada, cuadro, legalización, jornadas…</p>
+    <p class="guia">Pulsa el botón y habla: describe una obra para presupuestarla, o cuéntame tu día con horarios («de 6 a 9 estuve en…») y lo apunto todo en tu diario de partes.</p>
     <button class="btn-voz ${grabando?"grabando":""}" id="btn-voz" onclick="toggleGrabacion()">${grabando?"⏹️":"🎤"}</button>
     <div class="estado-voz" id="estado-voz">${grabando?"Grabando… pulsa para parar":"Pulsa para hablar"}</div>
     <textarea id="texto-nota" placeholder="…o escribe aquí la descripción de la obra a mano." oninput="textoNota=this.value">${esc(textoNota)}</textarea>
     <p class="ejemplo">Ejemplo: «Chalet en Villaviciosa, autoconsumo de 5 kW con 10 paneles de 550, inversor híbrido, tirada de unos 25 metros, cuadro nuevo con protecciones, legalización incluida y 2 operarios 2 jornadas.»</p>
     <div class="pie-form" style="justify-content:center">
-      <button class="btn sec" onclick="textoNota='';render()">Borrar</button>
-      <button class="btn sec" onclick="calcular('parte')">🛠️ Crear parte</button>
       <button class="btn amarillo" onclick="calcular('presu')">⚡ Calcular presupuesto</button>
+      <button class="btn sec" onclick="calcular('parte')">🛠️ Crear parte</button>
+      <button class="btn sec" onclick="registrarDia()">🗓️ Registrar mi día</button>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:10px;flex-wrap:wrap">
+      <button class="btn sec mini" onclick="abrirPlantillas()">🗂️ O empezar desde una plantilla (solar, bombeo, vivienda, nave…)</button>
+      <button class="btn sec mini" onclick="textoNota='';render()">Borrar texto</button>
     </div>
   </div>`;
 }
@@ -377,10 +538,11 @@ function htmlEditor(){
     <button class="btn-icono" onclick="editando.lineas.splice(${i},1);render()">✕</button></div>`;
   return `<div class="tarjeta">
     <div class="fila-titulo"><h2>${esc(p.numero)} · ${p.tipo === "parte" ? "Parte de trabajo" : "Presupuesto"}</h2>
-      <span class="chip ${p.estado}">${p.estado}</span></div>
+      <span style="display:flex;gap:6px;flex-wrap:wrap">${p.categoria?`<span class="chip mio">${esc(p.categoria)}</span>`:""}<span class="chip ${p.estado}">${p.estado}</span></span></div>
     ${p.sinReconocer ? `<div class="aviso">🤔 No he reconocido materiales en la nota. Añade las líneas a mano o revisa el texto en «Nueva nota».</div>` : ""}
     <div class="rejilla c3">
-      <div><label>Cliente</label><input value="${esc(p.cliente)}" oninput="editando.cliente=this.value" placeholder="Nombre del cliente"></div>
+      <div><label>Cliente</label><input list="lista-clientes" value="${esc(p.cliente)}" oninput="editando.cliente=this.value;autoTelefono()" placeholder="Nombre del cliente">
+        <datalist id="lista-clientes">${state.clientes.map(c=>`<option value="${esc(c.nombre)}">`).join("")}</datalist></div>
       <div><label>Teléfono (para WhatsApp)</label><input value="${esc(p.telefono)}" oninput="editando.telefono=this.value" placeholder="6XX XXX XXX"></div>
       <div><label>Obra / dirección</label><input value="${esc(p.obra)}" oninput="editando.obra=this.value" placeholder="p. ej. Chalet en Villaviciosa"></div>
     </div>
@@ -426,7 +588,15 @@ function refrescaTotales(){
   $("#totales").innerHTML = htmlTotales(totales(editando), editando);
   editando.lineas.forEach((l,i)=>{ const e=$("#venta-"+i); if(e) e.value = eur(ventaLinea(l, editando.margen)); });
 }
+function autoTelefono(){
+  const c = clientePorNombre(editando.cliente);
+  if (c && c.telefono && !editando.telefono){ editando.telefono = c.telefono; const inp = document.querySelectorAll('.rejilla.c3 input')[1]; if(inp) inp.value = c.telefono; }
+}
 function guardar(quedarse){
+  if (editando.cliente && editando.cliente.trim()){
+    const r = obtenerOCrearCliente(editando.cliente);
+    if (editando.telefono && !r.cliente.telefono) r.cliente.telefono = editando.telefono;
+  }
   const arr = coleccion(editando.tipo || "presu");
   const i = arr.findIndex(x => x.id === editando.id);
   if (i >= 0) arr[i] = editando; else arr.push(editando);
@@ -449,6 +619,72 @@ function anadirDeBase(i){
   cerrarModal(); render();
 }
 function cerrarModal(){ $("#modal").innerHTML = ""; }
+/* ================= PESTAÑA PARTES (diario + valorados) ================= */
+function htmlPartesTab(){
+  const toggle = `<div style="display:flex;gap:8px;margin-bottom:14px">
+    <button class="btn ${modoPartes==="diario"?"amarillo":"sec"} mini" onclick="modoPartes='diario';render()">📅 Diario</button>
+    <button class="btn ${modoPartes==="valorados"?"amarillo":"sec"} mini" onclick="modoPartes='valorados';render()">🧾 Partes valorados</button>
+  </div>`;
+  return toggle + (modoPartes === "diario" ? htmlDiario() : htmlLista("parte"));
+}
+function htmlDiario(){
+  const porDia = {};
+  (state.diario||[]).forEach(e => { (porDia[e.fecha] = porDia[e.fecha] || []).push(e); });
+  const fechas = Object.keys(porDia).sort().reverse();
+  const dias = fechas.map(f => {
+    const entradas = porDia[f].sort((a,b) => a.desde.localeCompare(b.desde));
+    const totalH = Math.round(entradas.reduce((s,e)=>s+(+e.horas||0),0)*10)/10;
+    const filas = entradas.map(e => `
+      <div class="dia-entrada" onclick="editarEntradaDia('${e.id}')">
+        <div class="dia-hora"><span>${esc(e.desde)}</span><span class="dia-flecha">↓</span><span>${esc(e.hasta)}</span></div>
+        <div class="dia-cuerpo">
+          <div class="dia-txt">${esc(e.texto)}</div>
+          <div class="dia-meta">
+            ${e.clienteId ? `<span class="chip mio">👤 ${esc(nombreCliente(e.clienteId))}</span>` : `<span class="chip ref">sin cliente</span>`}
+            <span class="chip ref">${e.horas} h</span>
+            ${e.facturado ? `<span class="chip aceptado">→ en parte</span>` : ""}
+          </div>
+        </div>
+        <div class="dia-acciones" onclick="event.stopPropagation()">
+          <button class="btn-icono" title="Convertir en parte valorado" onclick="diarioAParte('${e.id}')">💶</button>
+          <button class="btn-icono" title="Eliminar" onclick="borrarEntradaDia('${e.id}')">🗑️</button>
+        </div>
+      </div>`).join("");
+    return `<div class="tarjeta">
+      <div class="fila-titulo" style="margin-bottom:10px"><h2 style="font-size:1.05rem">${fFecha(f)}${f===hoy()?" · HOY":""}</h2>
+        <span class="chip mio">${totalH} h trabajadas</span></div>
+      ${filas}</div>`;
+  }).join("");
+  return avisoDatos() + `
+    ${dias || `<div class="tarjeta"><div class="vacio"><strong>Tu diario está vacío</strong>
+      <p>Ve a «Nueva nota», pulsa el micrófono y cuéntame tu día:<br><em>«De 6:00 a 9:00 arreglando un motor en el almacén de ajos Manuel Pérez, de 9 a 10 en el almacén eléctrico a por una pieza…»</em><br>Y pulsa <strong>🗓️ Registrar mi día</strong>. Yo troceo los tramos, calculo las horas y creo los clientes nuevos.</p></div></div>`}`;
+}
+/* ================= PLANTILLAS ================= */
+function abrirPlantillas(){
+  $("#modal").innerHTML = `<div style="position:fixed;inset:0;background:rgba(26,28,30,.55);display:flex;align-items:center;justify-content:center;z-index:100;padding:16px" onclick="if(event.target===this)cerrarModal()">
+    <div style="background:#fff;border-radius:12px;padding:18px;max-width:520px;width:100%;max-height:82vh;overflow:auto">
+      <h3 class="sub" style="margin-top:0">🗂️ Empezar desde una plantilla</h3>
+      <p style="color:var(--gris);font-size:.88rem;margin-bottom:12px">Elige el tipo de trabajo y te preparo el presupuesto con las líneas habituales y tus precios. Luego ajustas cantidades.</p>
+      ${PLANTILLAS.map((c,ci) => `<div style="margin-bottom:12px">
+        <div style="font-family:'Barlow Semi Condensed';font-weight:700;text-transform:uppercase;font-size:.85rem;letter-spacing:.5px;margin-bottom:6px">${c.cat}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          ${c.subs.map((s,si) => `<button class="btn sec mini" onclick="aplicarPlantilla(${ci},${si})">${esc(s.nombre)}</button>`).join("")}
+        </div></div>`).join("")}
+      <div class="pie-form"><button class="btn sec mini" onclick="cerrarModal()">Cerrar</button></div>
+    </div></div>`;
+}
+function aplicarPlantilla(ci, si){
+  const cat = PLANTILLAS[ci], sub = cat.subs[si];
+  const lineas = sub.lineas.map(([k, cant]) => {
+    const it = precioDe(k);
+    return it ? {concepto: it.nombre, cant, unidad: it.unidad, precio: it.precio, esMO: !!it.esMO} : null;
+  }).filter(Boolean);
+  editando = {id: uid(), tipo: "presu", numero: siguienteNumero("presu"), fecha: hoy(), cliente:"", telefono:"", obra:"",
+    nota: "", categoria: cat.cat.replace(/^\S+\s/,"") + " · " + sub.nombre, lineas,
+    margen: state.config.margen, iva: state.config.iva, conIva: state.config.conIva,
+    estado: "borrador", firma:"", observaciones:"", sinReconocer: false};
+  cerrarModal(); vista = "editor"; render(); window.scrollTo(0,0);
+}
 /* ================= PANTALLA: LISTA ================= */
 function htmlLista(tipo){
   const lista = coleccion(tipo).filter(p =>
@@ -664,6 +900,8 @@ function importarDatos(ev){
       const d = JSON.parse(r.result);
       if (!d.config || !Array.isArray(d.precios)) throw new Error("formato");
       if (!Array.isArray(d.partes)) d.partes = [];
+      if (!Array.isArray(d.clientes)) d.clientes = [];
+      if (!Array.isArray(d.diario)) d.diario = [];
       if (!d.config.prefijoParte) d.config.prefijoParte = "PT";
       state = d; cambiosSinGuardar = false; editando = null;
       render();
