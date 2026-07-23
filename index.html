@@ -141,33 +141,43 @@
     body{background:#fff}
     #zona-impresion{display:block;color:#000}
   }
-  .doc{max-width:760px;margin:0 auto;padding:10px;font-family:'Barlow',sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .doc-ico{display:inline-block;width:20px;margin-right:2px}
-  .doc-validez{margin-top:5px;background:#FFF3B8;border:1px solid #F5C400;border-radius:99px;padding:2px 9px;font-weight:600;display:inline-block}
-  .doc-badges{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}
-  .doc-badges span{background:#f6f5f0;border:1.2px solid #DDDDD6;border-radius:99px;padding:4px 11px;font-size:10.5px;font-weight:700;font-family:'Barlow Semi Condensed',sans-serif;text-transform:uppercase;letter-spacing:.4px;color:#1A1C1E}
-  .doc-dato{display:flex;gap:16px;flex-wrap:wrap;background:#f6f5f0;border:1.2px solid #DDDDD6;border-radius:8px;padding:9px 13px;font-size:11.5px;margin-top:12px;font-weight:500}
-  .doc-fotos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
-  .doc-fotos img{width:100%;height:112px;object-fit:cover;border-radius:8px;border:1.5px solid #DDDDD6}
-  .doc-cta{margin-top:16px;background:#1A1C1E;color:#fff;border-radius:10px;padding:13px 16px;font-size:12.5px;line-height:1.55}
-  .doc-cta strong{color:#F5C400}
-  .doc-cinta{background:repeating-linear-gradient(-45deg,#F5C400 0 12px,#1A1C1E 12px 24px);height:6px;margin-bottom:16px}
-  .doc-cab{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:20px;border-bottom:3px solid #1A1C1E;padding-bottom:12px;margin-bottom:14px}
-  .doc-cab img{max-height:64px;max-width:190px}
-  .doc-cab .emp{font-size:12.5px;line-height:1.45}
-  .doc-cab .emp strong{font-size:16px;font-family:'Barlow Semi Condensed',sans-serif;text-transform:uppercase}
-  .doc-tit{text-align:right;font-family:'IBM Plex Mono',monospace;font-size:12px}
-  .doc-tit h2{font-family:'Barlow Semi Condensed',sans-serif;font-size:19px;text-transform:uppercase;margin-bottom:2px}
-  .doc-cliente{background:#f6f5f0;border:1.5px solid #DDDDD6;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:12.5px}
-  .doc-lineas{font-family:'IBM Plex Mono',monospace;font-size:12px;margin-bottom:12px}
-  .doc-lineas .cab{display:flex;justify-content:space-between;border-bottom:2px solid #1A1C1E;padding-bottom:6px;margin-bottom:6px;font-weight:600;text-transform:uppercase;font-size:10.5px;letter-spacing:.5px}
-  .doc-lineas .l{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px dashed #DDDDD6}
-  .doc-lineas .l .c{flex:1}
-  .doc-lineas .l .i{white-space:nowrap;font-weight:500}
-  .doc-total{display:flex;justify-content:space-between;background:#F5C400;padding:10px 12px;border-radius:4px;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:14px;margin-top:10px}
-  .doc-iva{display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:12px;padding:4px 12px 0}
-  .doc .obs{margin-top:14px;font-size:11.5px;color:#475569;white-space:pre-wrap}
-  .doc-pie{margin-top:26px;font-size:10.5px;color:#5B5E63;border-top:1.5px solid #DDDDD6;padding-top:8px}
+  .doc{max-width:760px;margin:0 auto;padding:10px;font-family:'Barlow',sans-serif;color:#1A1C1E;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .doc-cinta{border-top:3px solid #1A1C1E;border-bottom:2px solid #F5C400;height:3px;margin-bottom:18px}
+  .doc-cab{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:20px;padding-bottom:14px;border-bottom:2.5px solid #1A1C1E;margin-bottom:2px}
+  .doc-cab img{max-height:60px;max-width:180px}
+  .doc-cab .emp{font-size:12px;line-height:1.5;color:#3a3d40}
+  .doc-cab .emp strong{font-size:17px;font-family:'Barlow Semi Condensed',sans-serif;text-transform:uppercase;letter-spacing:.3px;color:#1A1C1E}
+  .doc-tit{text-align:right}
+  .doc-tit h2{font-family:'Barlow Semi Condensed',sans-serif;font-size:21px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+  .doc-tit table{margin-left:auto;border-collapse:collapse;font-size:11px;font-family:'IBM Plex Mono',monospace}
+  .doc-tit td{padding:1.5px 0 1.5px 14px;text-align:right}
+  .doc-tit td:first-child{color:#5B5E63;text-transform:uppercase;font-size:9.5px;letter-spacing:.5px}
+  .doc-badges{display:flex;justify-content:center;flex-wrap:wrap;gap:6px 22px;margin:10px 0 16px;padding:7px 0;border-bottom:1px solid #DDDDD6;font-family:'Barlow Semi Condensed',sans-serif;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#3a3d40}
+  .doc-badges span::before{content:"✓  ";color:#8a6d00}
+  .doc-cliente{border-left:4px solid #F5C400;padding:8px 0 8px 14px;margin-bottom:16px;font-size:12.5px;line-height:1.6}
+  .doc-cliente .etq{font-family:'Barlow Semi Condensed',sans-serif;text-transform:uppercase;font-size:9.5px;letter-spacing:.8px;color:#5B5E63;display:block}
+  .doc-tabla{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:4px}
+  .doc-tabla th{font-family:'Barlow Semi Condensed',sans-serif;text-transform:uppercase;font-size:10px;letter-spacing:.8px;text-align:left;color:#1A1C1E;border-bottom:2px solid #1A1C1E;padding:6px 8px}
+  .doc-tabla th.n,.doc-tabla td.n{text-align:right;white-space:nowrap;font-family:'IBM Plex Mono',monospace}
+  .doc-tabla td{padding:7px 8px;border-bottom:1px solid #e8e7e2;vertical-align:top;line-height:1.45}
+  .doc-tabla td.n{font-size:11.5px}
+  .doc-tabla tr:nth-child(even) td{background:#fafaf7}
+  .doc-resumen{width:290px;margin-left:auto;border-collapse:collapse;font-family:'IBM Plex Mono',monospace;font-size:12px;margin-top:8px}
+  .doc-resumen td{padding:5px 8px;text-align:right}
+  .doc-resumen td:first-child{color:#5B5E63;text-align:left;font-family:'Barlow',sans-serif}
+  .doc-resumen tr.tot td{border-top:2.5px solid #1A1C1E;border-bottom:3px double #1A1C1E;font-weight:600;font-size:15px;padding:9px 8px;background:#FFF7D6}
+  .doc-dato{display:flex;gap:8px 26px;flex-wrap:wrap;border:1px solid #DDDDD6;border-left:4px solid #1A1C1E;padding:9px 14px;font-size:11px;margin-top:16px;color:#3a3d40}
+  .doc-dato strong{color:#1A1C1E}
+  .doc-fotos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}
+  .doc-fotos img{width:100%;height:112px;object-fit:cover;border:1px solid #c9c9c2}
+  .doc-fotos-tit,.doc-obs-tit{font-family:'Barlow Semi Condensed',sans-serif;text-transform:uppercase;font-size:10px;letter-spacing:.8px;color:#5B5E63;margin:16px 0 6px;border-bottom:1px solid #DDDDD6;padding-bottom:3px}
+  .doc .obs{font-size:11.5px;color:#3a3d40;white-space:pre-wrap;line-height:1.55}
+  .doc-cta{margin-top:20px;border:1.5px solid #1A1C1E;padding:0;display:flex;flex-wrap:wrap}
+  .doc-cta .cta-txt{flex:1.4;min-width:230px;padding:12px 16px;font-size:11.5px;line-height:1.6;color:#1A1C1E}
+  .doc-cta .cta-txt h4{font-family:'Barlow Semi Condensed',sans-serif;text-transform:uppercase;font-size:11px;letter-spacing:.8px;margin-bottom:4px;border-bottom:2px solid #F5C400;display:inline-block;padding-bottom:2px}
+  .doc-cta .cta-firma{flex:1;min-width:180px;border-left:1.5px solid #1A1C1E;padding:12px 16px;display:flex;flex-direction:column;justify-content:flex-end}
+  .doc-cta .cta-firma .linea{border-top:1px solid #5B5E63;margin-top:46px;padding-top:5px;font-size:9.5px;color:#5B5E63;text-align:center;font-family:'IBM Plex Mono',monospace;text-transform:uppercase}
+  .doc-pie{margin-top:24px;font-size:10px;color:#5B5E63;border-top:1px solid #DDDDD6;padding-top:8px;line-height:1.5}
   .doc-firmas{display:flex;gap:30px;margin-top:28px}
   .doc-firmas>div{flex:1}
   .doc-firmas .hueco{height:78px;display:flex;align-items:flex-end;justify-content:center}
@@ -1581,29 +1591,47 @@ function validezDe(p){
 function docHtml(p){
   const e = state.config.empresa, t = totales(p);
   const esPresu = p.tipo !== "parte";
-  const lin = (p.lineas||[]).filter(l=>l.concepto).map(l =>
-    `<div class="l"><span class="c"><span class="doc-ico">${famLinea(l)}</span>${l.cant && +l.cant !== 1 ? esc(l.cant)+ (l.unidad==="m"?" m ":"× ") : ""}${esc(l.concepto)}</span><span class="i">${eur(ventaLinea(l,p.margen))}</span></div>`).join("");
+  const filas = (p.lineas||[]).filter(l=>l.concepto).map(l => {
+    const cant = +l.cant || 1;
+    const importe = ventaLinea(l, p.margen);
+    return `<tr><td>${esc(l.concepto)}</td><td class="n">${esc(cant)} ${esc(l.unidad||"ud")}</td><td class="n">${eur(importe/cant)}</td><td class="n">${eur(importe)}</td></tr>`;
+  }).join("");
   const validez = validezDe(p);
   const he = horasEstimadas(p);
   const sellos = String(state.config.sellos || "").split("·").map(s => s.trim()).filter(Boolean);
   const fotos = (p.fotos || []).slice(0, 6);
-  return `<div class="doc"><div class="doc-cinta"></div>
+  return `<div class="doc">
     <div class="doc-cab">
-      <div style="display:flex;gap:14px;align-items:flex-start">
+      <div style="display:flex;gap:16px;align-items:flex-start">
         ${e.logo?`<img src="${e.logo}">`:""}
         <div class="emp"><strong>${esc(e.nombre||"Tu empresa")}</strong><br>
           ${e.nif?"NIF: "+esc(e.nif)+"<br>":""}${esc(e.telefono||"")}${e.telefono&&e.email?" · ":""}${esc(e.email||"")}</div></div>
-      <div class="doc-tit"><h2>${esPresu ? "Presupuesto" : "Parte de trabajo"}</h2><div>Nº ${esc(p.numero)}</div><div>${fFecha(p.fecha)}</div>${validez?`<div class="doc-validez">📅 Válido hasta ${validez}</div>`:""}</div>
+      <div class="doc-tit"><h2>${esPresu ? "Presupuesto" : "Parte de trabajo"}</h2>
+        <table>
+          <tr><td>Número</td><td>${esc(p.numero)}</td></tr>
+          <tr><td>Fecha</td><td>${fFecha(p.fecha)}</td></tr>
+          ${validez?`<tr><td>Válido hasta</td><td>${validez}</td></tr>`:""}
+        </table></div>
     </div>
-    ${sellos.length?`<div class="doc-badges">${sellos.map(s=>`<span>✓ ${esc(s)}</span>`).join("")}</div>`:""}
-    ${p.cliente||p.obra?`<div class="doc-cliente"><strong>${esc(p.cliente||"")}</strong>${p.cliente&&p.obra?" · ":""}${esc(p.obra||"")}</div>`:""}
-    <div class="doc-lineas"><div class="cab"><span>Concepto</span><span>Importe</span></div>${lin}</div>
-    ${p.conIva?`<div class="doc-iva"><span>Base imponible</span><span>${eur(t.venta)}</span></div><div class="doc-iva"><span>IVA (${p.iva}%)</span><span>${eur(t.iva)}</span></div>`:""}
-    <div class="doc-total"><span>TOTAL${p.conIva?"":" (IVA no incl.)"}</span><span>${eur(t.total)}</span></div>
-    ${esPresu && he ? `<div class="doc-dato"><span>⏱️ Ejecución estimada: ${Math.max(1,Math.ceil(he/8))} jornada${Math.ceil(he/8)>1?"s":""}</span><span>📆 Fecha: a acordar contigo</span><span>🧾 Precio con materiales y mano de obra</span></div>` : ""}
-    ${fotos.length?`<div class="doc-fotos">${fotos.map(f=>`<img src="${f}">`).join("")}</div>`:""}
-    ${p.observaciones?`<div class="obs">${esc(p.observaciones)}</div>`:""}
-    ${esPresu ? `<div class="doc-cta"><strong>¿Te encaja?</strong> Escríbenos por WhatsApp${e.telefono?` al <strong>${esc(e.telefono)}</strong>`:""} o llámanos y reservamos fecha. Sin compromiso — cualquier duda te la resolvemos al momento.</div>` : ""}
+    <div class="doc-cinta"></div>
+    ${sellos.length?`<div class="doc-badges">${sellos.map(s=>`<span>${esc(s)}</span>`).join("")}</div>`:""}
+    ${p.cliente||p.obra?`<div class="doc-cliente" style="display:flex;gap:44px;flex-wrap:wrap">${p.cliente?`<span><span class="etq">Cliente</span><strong>${esc(p.cliente)}</strong></span>`:""}${p.obra?`<span><span class="etq">Obra / dirección</span>${esc(p.obra)}</span>`:""}</div>`:""}
+    <table class="doc-tabla">
+      <thead><tr><th>Concepto</th><th class="n">Cantidad</th><th class="n">Precio ud.</th><th class="n">Importe</th></tr></thead>
+      <tbody>${filas}</tbody>
+    </table>
+    <table class="doc-resumen">
+      ${p.conIva?`<tr><td>Base imponible</td><td>${eur(t.venta)}</td></tr><tr><td>IVA (${p.iva} %)</td><td>${eur(t.iva)}</td></tr>`:""}
+      <tr class="tot"><td>TOTAL${p.conIva?"":" (IVA no incluido)"}</td><td>${eur(t.total)}</td></tr>
+    </table>
+    ${esPresu && he ? `<div class="doc-dato"><span><strong>Plazo de ejecución estimado:</strong> ${Math.max(1,Math.ceil(he/8))} jornada${Math.ceil(he/8)>1?"s":""}</span><span><strong>Inicio:</strong> fecha a convenir con usted</span><span><strong>Incluye:</strong> materiales y mano de obra</span></div>` : ""}
+    ${fotos.length?`<div class="doc-fotos-tit">Fotografías</div><div class="doc-fotos">${fotos.map(f=>`<img src="${f}">`).join("")}</div>`:""}
+    ${p.observaciones?`<div class="doc-obs-tit">Observaciones</div><div class="obs">${esc(p.observaciones)}</div>`:""}
+    ${esPresu ? `<div class="doc-cta">
+      <div class="cta-txt"><h4>Aceptación del presupuesto</h4>
+        Para aceptarlo, basta con responder por WhatsApp${e.telefono?` o llamar al <strong>${esc(e.telefono)}</strong>`:""}, o firmar este documento. En cuanto nos confirme, reservamos fecha. Presupuesto sin compromiso, con el precio garantizado durante su periodo de validez.</div>
+      <div class="cta-firma"><div class="linea">Aceptado — firma del cliente y fecha</div></div>
+    </div>` : ""}
     ${!esPresu ? `<div class="doc-firmas">
       <div><div class="hueco"></div><div class="linea">Firma del técnico</div></div>
       <div><div class="hueco">${p.firma?`<img src="${p.firma}">`:""}</div><div class="linea">Conforme del cliente</div></div>
