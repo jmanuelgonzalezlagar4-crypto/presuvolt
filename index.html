@@ -184,6 +184,19 @@
   .doc-firmabox{flex:1;min-width:180px;background:#fff;border:1px dashed #c9c9c2;border-radius:10px;height:84px;position:relative}
   .doc-firmabox img{position:absolute;inset:4px auto 16px 4px;max-height:60px;max-width:calc(100% - 8px)}
   .doc-firmabox span{position:absolute;bottom:5px;left:0;right:0;text-align:center;font-size:8.5px;color:#a0a4aa;font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.5px}
+  @media screen and (max-width:620px){
+    .doc{padding:2px}
+    .doc-card{padding:13px 14px}
+    .doc-tabla thead{display:none}
+    .doc-tabla tr{display:block;padding:9px 2px;border-bottom:1px solid #eceae3}
+    .doc-tabla tbody tr:last-child{border-bottom:none}
+    .doc-tabla td{display:inline-block;padding:2px 14px 2px 0;background:none!important;border-radius:0!important;border-bottom:none!important}
+    .doc-tabla td:first-child{display:block;font-weight:600;padding:0 0 4px;font-size:13px;line-height:1.4}
+    .doc-tabla td.n{font-size:11.5px;color:#44484e}
+    .doc-tabla td.n::before{content:attr(data-etq) "  ";font-family:'Barlow Semi Condensed',sans-serif;font-size:9px;letter-spacing:.8px;text-transform:uppercase;color:#a0a4aa}
+    .doc-totalcard .imp{font-size:22px}
+    .doc-cta{flex-direction:column;align-items:stretch}
+  }
   .doc-sellos{display:flex;justify-content:center;gap:14px 30px;flex-wrap:wrap;font-family:'Barlow Semi Condensed',sans-serif;font-size:10px;letter-spacing:1.3px;text-transform:uppercase;color:#7c8087;margin:6px 0 10px}
   .doc-sellos span::before{content:"✓ ";color:#c79a00}
   .doc-pie{font-size:9.5px;color:#b3b7bc;text-align:center;margin-top:4px;line-height:1.5}
@@ -1598,7 +1611,7 @@ function docHtml(p){
   const filas = (p.lineas||[]).filter(l=>l.concepto).map(l => {
     const cant = +l.cant || 1;
     const importe = ventaLinea(l, p.margen);
-    return `<tr><td>${esc(l.concepto)}</td><td class="n">${esc(cant)} ${esc(l.unidad||"ud")}</td><td class="n">${eur(importe/cant)}</td><td class="n">${eur(importe)}</td></tr>`;
+    return `<tr><td>${esc(l.concepto)}</td><td class="n" data-etq="Cant.">${esc(cant)} ${esc(l.unidad||"ud")}</td><td class="n" data-etq="Precio ud.">${eur(importe/cant)}</td><td class="n" data-etq="Importe">${eur(importe)}</td></tr>`;
   }).join("");
   const validez = validezDe(p);
   const he = horasEstimadas(p);

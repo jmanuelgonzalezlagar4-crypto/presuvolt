@@ -1,4 +1,4 @@
-const CACHE = "presuvolt-v17";
+const CACHE = "presuvolt-v18";
 const FICHEROS = ["./", "./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png"];
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FICHEROS)).then(() => self.skipWaiting()));
