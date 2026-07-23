@@ -1,0 +1,1 @@
+[{"relation": ["delegate_permission/common.handle_all_urls"], "target": {"namespace": "android_app", "package_name": "io.github.jmanuelgonzalezlagar4_crypto.presuvolt", "sha256_cert_fingerprints": ["0A:B7:2A:A5:2B:F4:15:ED:67:40:B0:94:EF:A3:D4:59:18:38:CA:65:CE:07:D6:A0:F6:E3:7C:58:A7:9E:35:0A"]}}]
