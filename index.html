@@ -87,7 +87,19 @@
   /* ---- editor ---- */
   .linea-item{display:grid;grid-template-columns:1fr 74px 92px 96px 34px;gap:8px;align-items:center;margin-bottom:8px}
   .cab-lineas{display:grid;grid-template-columns:1fr 74px 92px 96px 34px;gap:8px;font-family:'IBM Plex Mono',monospace;font-size:.62rem;font-weight:600;color:var(--gris);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
-  @media(max-width:640px){.linea-item,.cab-lineas{grid-template-columns:1fr 52px 76px 80px 30px}}
+  .li-campo{display:flex;flex-direction:column;min-width:0}
+  .li-campo em{display:none;font-style:normal;font-family:'IBM Plex Mono',monospace;font-size:.56rem;font-weight:600;color:var(--gris);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}
+  .li-campo input{width:100%}
+  @media(max-width:640px){
+    .cab-lineas{display:none}
+    .linea-item{grid-template-columns:1fr 1fr 1.2fr 34px;grid-template-areas:"con con con x" "cant coste venta venta";gap:6px 8px;border:1.5px solid var(--linea);border-radius:10px;padding:9px;background:#fff}
+    .linea-item>input:first-child{grid-area:con;font-weight:600}
+    .li-cant{grid-area:cant}
+    .li-coste{grid-area:coste}
+    .li-venta{grid-area:venta}
+    .linea-item .btn-icono{grid-area:x;align-self:start}
+    .li-campo em{display:block}
+  }
   .linea-item input{padding:8px 8px;font-size:15px}
   .venta{font-family:'IBM Plex Mono',monospace;text-align:right;background:#f6f5f0!important}
   .caja-totales{background:#f6f5f0;border:1.5px solid var(--linea);border-radius:8px;padding:14px 18px;margin-top:14px;max-width:360px;margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:.92rem}
@@ -966,9 +978,9 @@ function htmlEditor(){
   const p = editando, t = totales(p);
   const fila = (l,i) => `<div class="linea-item">
     <input placeholder="Concepto" value="${esc(l.concepto)}" oninput="editando.lineas[${i}].concepto=this.value">
-    <input type="number" step="0.5" min="0" value="${esc(l.cant)}" oninput="editando.lineas[${i}].cant=this.value;refrescaTotales()">
-    <input type="number" step="0.01" min="0" title="Tu coste" value="${esc(l.precio)}" oninput="editando.lineas[${i}].precio=this.value;refrescaTotales()">
-    <input disabled class="venta" id="venta-${i}" title="Precio de venta (con margen)" value="${eur(ventaLinea(l,p.margen))}">
+    <span class="li-campo li-cant"><em>Cant.</em><input type="number" step="0.5" min="0" value="${esc(l.cant)}" oninput="editando.lineas[${i}].cant=this.value;refrescaTotales()"></span>
+    <span class="li-campo li-coste"><em>Coste €</em><input type="number" step="0.01" min="0" title="Tu coste" value="${esc(l.precio)}" oninput="editando.lineas[${i}].precio=this.value;refrescaTotales()"></span>
+    <span class="li-campo li-venta"><em>Venta</em><input disabled class="venta" id="venta-${i}" title="Precio de venta (con margen)" value="${eur(ventaLinea(l,p.margen))}"></span>
     <button class="btn-icono" onclick="editando.lineas.splice(${i},1);render()">✕</button></div>`;
   return `<div class="tarjeta">
     <div class="fila-titulo"><h2>${esc(p.numero)} · ${p.tipo === "parte" ? "Parte de trabajo" : "Presupuesto"}</h2>
@@ -1000,7 +1012,7 @@ function htmlEditor(){
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
       ${(p.fotos||[]).map((f,fi)=>`<span style="position:relative"><img src="${f}" style="height:74px;border-radius:8px;border:1.5px solid var(--linea)"><button class="btn-icono" style="position:absolute;top:-6px;right:-6px;background:#fff;border:1px solid var(--linea);border-radius:50%;font-size:11px;padding:2px 5px" onclick="editando.fotos.splice(${fi},1);render()">✕</button></span>`).join("")}
       <button class="btn sec mini" onclick="document.getElementById('foto-input').click()">📷 Añadir foto</button>
-      <input type="file" id="foto-input" accept="image/*" capture="environment" style="display:none" onchange="anadirFoto(event)">
+      <input type="file" id="foto-input" accept="image/*" style="display:none" onchange="anadirFoto(event)">
       <span style="color:var(--gris);font-size:.8rem">Salen en el PDF (máx. 6)</span>
     </div>
     <div style="margin-top:12px"><label>Estado</label><select onchange="editando.estado=this.value;if(this.value==='aceptado'&&editando.tipo!=='parte')festejar(totales(editando).total)" style="max-width:220px">
