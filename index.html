@@ -141,9 +141,18 @@
     body{background:#fff}
     #zona-impresion{display:block;color:#000}
   }
-  .doc{max-width:760px;margin:0 auto;padding:10px;font-family:'Barlow',sans-serif}
+  .doc{max-width:760px;margin:0 auto;padding:10px;font-family:'Barlow',sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .doc-ico{display:inline-block;width:20px;margin-right:2px}
+  .doc-validez{margin-top:5px;background:#FFF3B8;border:1px solid #F5C400;border-radius:99px;padding:2px 9px;font-weight:600;display:inline-block}
+  .doc-badges{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}
+  .doc-badges span{background:#f6f5f0;border:1.2px solid #DDDDD6;border-radius:99px;padding:4px 11px;font-size:10.5px;font-weight:700;font-family:'Barlow Semi Condensed',sans-serif;text-transform:uppercase;letter-spacing:.4px;color:#1A1C1E}
+  .doc-dato{display:flex;gap:16px;flex-wrap:wrap;background:#f6f5f0;border:1.2px solid #DDDDD6;border-radius:8px;padding:9px 13px;font-size:11.5px;margin-top:12px;font-weight:500}
+  .doc-fotos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+  .doc-fotos img{width:100%;height:112px;object-fit:cover;border-radius:8px;border:1.5px solid #DDDDD6}
+  .doc-cta{margin-top:16px;background:#1A1C1E;color:#fff;border-radius:10px;padding:13px 16px;font-size:12.5px;line-height:1.55}
+  .doc-cta strong{color:#F5C400}
   .doc-cinta{background:repeating-linear-gradient(-45deg,#F5C400 0 12px,#1A1C1E 12px 24px);height:6px;margin-bottom:16px}
-  .doc-cab{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;border-bottom:3px solid #1A1C1E;padding-bottom:12px;margin-bottom:14px}
+  .doc-cab{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:20px;border-bottom:3px solid #1A1C1E;padding-bottom:12px;margin-bottom:14px}
   .doc-cab img{max-height:64px;max-width:190px}
   .doc-cab .emp{font-size:12.5px;line-height:1.45}
   .doc-cab .emp strong{font-size:16px;font-family:'Barlow Semi Condensed',sans-serif;text-transform:uppercase}
@@ -169,9 +178,11 @@
 <body>
 <div class="cinta"></div>
 <header>
+  <span id="logo-emp" style="display:flex;align-items:center"></span>
   <div class="logo">Presu<span>Volt</span></div>
   <nav class="sup" id="nav"></nav>
   <div class="hdr-der">
+    <button class="btn sec mini" id="chip-sync" style="display:none" onclick="irA('ajustes')" title="Estado de la sincronización en equipo"></button>
     <button class="btn sec mini" onclick="exportarDatos()">💾 Copia</button>
     <button class="btn sec mini" onclick="document.getElementById('importar').click()">📂 Cargar</button>
     <input type="file" id="importar" accept=".json" style="display:none" onchange="importarDatos(event)">
@@ -283,6 +294,167 @@ function preciosReferencia(){
   R("mantfv","Mantenimiento anual fotovoltaica","ud",180,3,"🔧 Mantenimientos",true),
   R("revclima","Revisión anual climatización","ud",95,1.5,"🔧 Mantenimientos",true),
   R("revcuadro","Revisión de cuadro + termografía","ud",140,2,"🔧 Mantenimientos",true)
+  ].concat(preciosExtra()).map(p => (ALIAS_REF[p.k] ? Object.assign(p, {al: ALIAS_REF[p.k]}) : p));
+}
+/* Alias de búsqueda para el dictado (sinónimos con los que la gente nombra cada material) */
+const ALIAS_REF = {
+  panel450:"panel placa modulo solar", panel:"panel placa modulo solar", panel600:"panel placa modulo solar bifacial",
+  inv3:"inversor hibrido", inv5:"inversor hibrido", inv6:"inversor hibrido", inv10:"inversor hibrido", microinv:"microinversor",
+  bateria:"bateria acumulador litio", bateria10:"bateria acumulador litio", estructura:"estructura soporte anclaje",
+  estructura30:"estructura soporte inclinada", protecdc:"protecciones dc fusibles", vatimetro:"vatimetro meter contador",
+  legalizacion:"legalizacion boletin tramitacion legalizar memoria",
+  bomba:"kit bombeo solar", bombasum:"bomba sumergida pozo", bombapres:"grupo presion bomba", variador:"variador frecuencia",
+  sonda:"sonda nivel pozo", deposito:"deposito agua boya",
+  acs200:"deposito acumulador acs agua caliente", sueloradiante:"suelo radiante", radiadorbt:"radiador baja temperatura",
+  split3:"aire acondicionado split pared 3", split5:"aire acondicionado split pared 5", multi2:"multisplit aire acondicionado",
+  conductos:"aire acondicionado conductos", rejilla:"rejilla impulsion retorno", bombacond:"bomba condensados", cargagas:"carga gas refrigerante",
+  puntoluz:"punto luz lampara", enchufe:"punto enchufe toma corriente", puntotv:"toma tv television punto antena",
+  rj45:"toma red rj45 internet ordenador punto", lineadedicada:"linea dedicada", portero:"portero automatico telefonillo",
+  cuadro:"cuadro proteccion vivienda", cuadroind:"cuadro industrial trifasico nave",
+  magneto:"magnetotermico pia automatico", diferencial:"diferencial 40 30", difsi:"diferencial superinmunizado",
+  sobretension:"protector sobretensiones permanente transitoria",
+  cable:"cable metro tirada canalizacion linea", cable25:"cable linea hilo 2.5 mm metro", cable10:"cable linea 10 mm metro",
+  bandeja:"bandeja rejilla metro", manguera5g6:"manguera 5 g 6 x",
+  downlight:"downlight foco ojo buey led", panelled:"panel led 60 x 60 pantalla", campana:"campana industrial nave led",
+  tiraled:"tira led perfil metro", detector:"detector presencia movimiento", emergencia:"luz emergencia",
+  termostato:"termostato wifi", persianamot:"motor motorizacion persiana", enchufeint:"enchufe inteligente wifi",
+  videoportero:"videoportero wifi", cargador:"cargador coche electrico wallbox punto recarga", cargador3f:"wallbox cargador trifasico",
+  protecve:"protecciones linea vehiculo electrico", subvencionve:"subvencion moves tramitacion",
+  antena:"antena tdt mastil", amplificador:"amplificador senal antena", camara:"camara vigilancia cctv seguridad", kitcctv:"kit camaras grabador cctv"
+};
+/* Súper base de datos v2: mecanismos por marcas, iluminación por vatios, protecciones por amperaje, cableado por sección… */
+function preciosExtra(){
+  const R = (k,nombre,unidad,precio,tiempo,fam,esMO,al) => ({k,nombre,unidad,precio,tiempo:tiempo||0,fam,ref:true,esMO:!!esMO,al:al||""});
+  return [
+  // 🎛️ Mecanismos — genéricos primero (si no se dice marca, se usa este)
+  R("mec_int","Interruptor sencillo (mecanismo)","ud",3.8,.3,"🎛️ Mecanismos",false,"interruptor llave"),
+  R("mec_ench","Base de enchufe schuko (mecanismo)","ud",4.2,.3,"🎛️ Mecanismos",false,"enchufe toma corriente schuko"),
+  R("mec_conm","Conmutador (mecanismo)","ud",4.6,.35,"🎛️ Mecanismos",false,"conmutador"),
+  R("mec_cruz","Cruzamiento (mecanismo)","ud",8.5,.4,"🎛️ Mecanismos",false,"cruzamiento cruce"),
+  R("mec_puls","Pulsador (mecanismo)","ud",4.5,.3,"🎛️ Mecanismos",false,"pulsador"),
+  R("mec_reg","Regulador de luz (dimmer)","ud",22,.4,"🎛️ Mecanismos",false,"regulador dimmer atenuador"),
+  R("mec_pers","Interruptor de persiana","ud",12,.5,"🎛️ Mecanismos",false,"interruptor pulsador persiana"),
+  R("mec_tv","Toma de TV (mecanismo)","ud",6.5,.4,"🎛️ Mecanismos",false,"toma tv television antena"),
+  R("mec_rj45m","Toma RJ45 datos (mecanismo)","ud",9.5,.5,"🎛️ Mecanismos",false,"toma rj45 red datos internet"),
+  R("mec_usb","Toma cargador USB","ud",16,.4,"🎛️ Mecanismos",false,"toma cargador usb"),
+  R("mec_marco1","Marco 1 elemento","ud",2.2,.05,"🎛️ Mecanismos",false,"marco embellecedor 1"),
+  R("mec_marco2","Marco 2 elementos","ud",3.4,.05,"🎛️ Mecanismos",false,"marco embellecedor 2"),
+  R("mec_marco3","Marco 3 elementos","ud",4.8,.05,"🎛️ Mecanismos",false,"marco embellecedor 3"),
+  R("mec_est_ench","Base enchufe estanca superficie IP54","ud",7.5,.4,"🎛️ Mecanismos",false,"enchufe toma estanco superficie exterior ip54"),
+  R("mec_est_int","Interruptor estanco superficie IP54","ud",7,.4,"🎛️ Mecanismos",false,"interruptor estanco superficie exterior ip54"),
+  // BJC
+  R("bjci_ench","Base enchufe BJC Iris","ud",4.4,.3,"🎛️ Mecanismos",false,"enchufe toma schuko bjc iris"),
+  R("bjci_int","Interruptor BJC Iris","ud",3.9,.3,"🎛️ Mecanismos",false,"interruptor bjc iris"),
+  R("bjci_conm","Conmutador BJC Iris","ud",4.7,.35,"🎛️ Mecanismos",false,"conmutador bjc iris"),
+  R("bjci_cruz","Cruzamiento BJC Iris","ud",9.2,.4,"🎛️ Mecanismos",false,"cruzamiento bjc iris"),
+  R("bjci_puls","Pulsador BJC Iris","ud",4.9,.3,"🎛️ Mecanismos",false,"pulsador bjc iris"),
+  R("bjci_tv","Toma TV BJC Iris","ud",7.2,.4,"🎛️ Mecanismos",false,"toma tv television bjc iris"),
+  R("bjci_rj45","Toma RJ45 BJC Iris","ud",10.5,.5,"🎛️ Mecanismos",false,"toma rj45 red datos bjc iris"),
+  R("bjci_marco","Marco BJC Iris 1 elemento","ud",2.4,.05,"🎛️ Mecanismos",false,"marco bjc iris"),
+  R("bjcv_ench","Base enchufe BJC Viva","ud",5.4,.3,"🎛️ Mecanismos",false,"enchufe toma schuko bjc viva"),
+  R("bjcv_int","Interruptor BJC Viva","ud",4.9,.3,"🎛️ Mecanismos",false,"interruptor bjc viva"),
+  R("bjcv_conm","Conmutador BJC Viva","ud",5.8,.35,"🎛️ Mecanismos",false,"conmutador bjc viva"),
+  R("bjcv_tv","Toma TV BJC Viva","ud",8.2,.4,"🎛️ Mecanismos",false,"toma tv bjc viva"),
+  // Simon
+  R("s27_ench","Base enchufe Simon 27","ud",3.6,.3,"🎛️ Mecanismos",false,"enchufe toma schuko simon 27"),
+  R("s27_int","Interruptor Simon 27","ud",3.2,.3,"🎛️ Mecanismos",false,"interruptor simon 27"),
+  R("s27_conm","Conmutador Simon 27","ud",4.1,.35,"🎛️ Mecanismos",false,"conmutador simon 27"),
+  R("s27_cruz","Cruzamiento Simon 27","ud",8.2,.4,"🎛️ Mecanismos",false,"cruzamiento simon 27"),
+  R("s27_puls","Pulsador Simon 27","ud",4,.3,"🎛️ Mecanismos",false,"pulsador simon 27"),
+  R("s27_tv","Toma TV Simon 27","ud",6.4,.4,"🎛️ Mecanismos",false,"toma tv simon 27"),
+  R("s82_ench","Base enchufe Simon 82","ud",8.9,.3,"🎛️ Mecanismos",false,"enchufe toma schuko simon 82"),
+  R("s82_int","Interruptor Simon 82","ud",7.9,.3,"🎛️ Mecanismos",false,"interruptor simon 82"),
+  R("s82_conm","Conmutador Simon 82","ud",9.4,.35,"🎛️ Mecanismos",false,"conmutador simon 82"),
+  R("s82_cruz","Cruzamiento Simon 82","ud",14,.4,"🎛️ Mecanismos",false,"cruzamiento simon 82"),
+  R("s82_tv","Toma TV Simon 82","ud",11,.4,"🎛️ Mecanismos",false,"toma tv simon 82"),
+  R("s100_ench","Base enchufe Simon 100","ud",10.5,.3,"🎛️ Mecanismos",false,"enchufe toma schuko simon 100"),
+  R("s100_int","Interruptor Simon 100","ud",9.5,.3,"🎛️ Mecanismos",false,"interruptor simon 100"),
+  R("s100_conm","Conmutador Simon 100","ud",11,.35,"🎛️ Mecanismos",false,"conmutador simon 100"),
+  // Niessen / Legrand / Schneider
+  R("nz_ench","Base enchufe Niessen Zenit","ud",7.4,.3,"🎛️ Mecanismos",false,"enchufe toma schuko niessen zenit"),
+  R("nz_int","Interruptor Niessen Zenit","ud",6.8,.3,"🎛️ Mecanismos",false,"interruptor niessen zenit"),
+  R("nz_conm","Conmutador Niessen Zenit","ud",8.1,.35,"🎛️ Mecanismos",false,"conmutador niessen zenit"),
+  R("nz_tv","Toma TV Niessen Zenit","ud",9.8,.4,"🎛️ Mecanismos",false,"toma tv niessen zenit"),
+  R("lv_ench","Base enchufe Legrand Valena","ud",7.2,.3,"🎛️ Mecanismos",false,"enchufe toma schuko legrand valena"),
+  R("lv_int","Interruptor Legrand Valena","ud",6.5,.3,"🎛️ Mecanismos",false,"interruptor legrand valena"),
+  R("lv_conm","Conmutador Legrand Valena","ud",7.8,.35,"🎛️ Mecanismos",false,"conmutador legrand valena"),
+  R("su_ench","Base enchufe Schneider Unica","ud",7,.3,"🎛️ Mecanismos",false,"enchufe toma schuko schneider unica"),
+  R("su_int","Interruptor Schneider Unica","ud",6.4,.3,"🎛️ Mecanismos",false,"interruptor schneider unica"),
+  R("su_conm","Conmutador Schneider Unica","ud",7.6,.35,"🎛️ Mecanismos",false,"conmutador schneider unica"),
+  // 💡 Iluminación ampliada
+  R("down6","Downlight LED empotrar 6 W","ud",6.5,.35,"💡 Iluminación",false,"downlight foco empotrar 6 w"),
+  R("down12e","Downlight LED empotrar 12 W","ud",8.5,.35,"💡 Iluminación",false,"downlight foco empotrar 12 w"),
+  R("down18","Downlight LED empotrar 18 W","ud",10.5,.35,"💡 Iluminación",false,"downlight foco empotrar 18 w"),
+  R("down24","Downlight LED empotrar 24 W","ud",13,.35,"💡 Iluminación",false,"downlight foco empotrar 24 w"),
+  R("downs12","Downlight LED superficie 12 W","ud",12,.4,"💡 Iluminación",false,"downlight foco superficie 12 w"),
+  R("downs18","Downlight LED superficie 18 W","ud",14.5,.4,"💡 Iluminación",false,"downlight foco superficie 18 w"),
+  R("downs24","Downlight LED superficie 24 W","ud",17.5,.4,"💡 Iluminación",false,"downlight foco superficie 24 w"),
+  R("panel12030","Panel LED 120×30","ud",39,.5,"💡 Iluminación",false,"panel led 120 30 pantalla"),
+  R("regleta60","Regleta LED estanca 60 cm","ud",14,.4,"💡 Iluminación",false,"regleta pantalla estanca fluorescente 60"),
+  R("regleta120","Regleta LED estanca 120 cm","ud",19,.4,"💡 Iluminación",false,"regleta pantalla estanca fluorescente 120"),
+  R("regleta150","Regleta LED estanca 150 cm","ud",24,.4,"💡 Iluminación",false,"regleta pantalla estanca fluorescente 150"),
+  R("tubo120","Tubo LED 120 cm","ud",7.5,.25,"💡 Iluminación",false,"tubo led fluorescente 120"),
+  R("proyector30","Proyector LED 30 W","ud",14,.5,"💡 Iluminación",false,"proyector foco exterior 30 w"),
+  R("proyector50","Proyector LED 50 W","ud",19,.5,"💡 Iluminación",false,"proyector foco exterior 50 w"),
+  R("proyector100","Proyector LED 100 W","ud",34,.7,"💡 Iluminación",false,"proyector foco exterior 100 w"),
+  R("proyector200","Proyector LED 200 W","ud",59,.8,"💡 Iluminación",false,"proyector foco exterior nave 200 w"),
+  R("aplique","Aplique LED de pared","ud",24,.5,"💡 Iluminación",false,"aplique pared"),
+  R("plafon","Plafón LED de techo","ud",22,.4,"💡 Iluminación",false,"plafon techo redondo"),
+  R("baliza","Baliza / farola de jardín","ud",38,.7,"💡 Iluminación",false,"baliza farola jardin exterior"),
+  // 🛡️ Protecciones por calibre
+  R("mag10","Magnetotérmico 10 A","ud",16,.3,"🛡️ Cuadros y protecciones",false,"magnetotermico pia automatico 10"),
+  R("mag16","Magnetotérmico 16 A","ud",16.5,.3,"🛡️ Cuadros y protecciones",false,"magnetotermico pia automatico 16"),
+  R("mag20","Magnetotérmico 20 A","ud",17,.3,"🛡️ Cuadros y protecciones",false,"magnetotermico pia automatico 20"),
+  R("mag25","Magnetotérmico 25 A","ud",18,.3,"🛡️ Cuadros y protecciones",false,"magnetotermico pia automatico 25"),
+  R("mag32","Magnetotérmico 32 A","ud",21,.3,"🛡️ Cuadros y protecciones",false,"magnetotermico pia automatico 32"),
+  R("mag40","Magnetotérmico 40 A","ud",26,.3,"🛡️ Cuadros y protecciones",false,"magnetotermico pia automatico 40"),
+  R("mag3f16","Magnetotérmico trifásico 16 A","ud",45,.5,"🛡️ Cuadros y protecciones",false,"magnetotermico trifasico 16"),
+  R("mag3f25","Magnetotérmico trifásico 25 A","ud",49,.5,"🛡️ Cuadros y protecciones",false,"magnetotermico trifasico 25"),
+  R("mag3f32","Magnetotérmico trifásico 32 A","ud",55,.5,"🛡️ Cuadros y protecciones",false,"magnetotermico trifasico 32"),
+  R("mag3f63","Magnetotérmico trifásico 63 A","ud",85,.5,"🛡️ Cuadros y protecciones",false,"magnetotermico trifasico 63"),
+  R("dif63","Diferencial 63 A 30 mA","ud",78,.4,"🛡️ Cuadros y protecciones",false,"diferencial 63"),
+  R("dif300","Diferencial 300 mA","ud",52,.4,"🛡️ Cuadros y protecciones",false,"diferencial 300 ma"),
+  R("iga40","IGA interruptor general 40 A","ud",38,.5,"🛡️ Cuadros y protecciones",false,"iga general automatico 40"),
+  R("iga63","IGA interruptor general 63 A","ud",55,.5,"🛡️ Cuadros y protecciones",false,"iga general automatico 63"),
+  R("icp","ICP interruptor control potencia","ud",30,.4,"🛡️ Cuadros y protecciones",false,"icp control potencia"),
+  R("contactor25","Contactor 25 A","ud",28,.6,"🛡️ Cuadros y protecciones",false,"contactor 25"),
+  R("contactor40","Contactor 40 A","ud",44,.6,"🛡️ Cuadros y protecciones",false,"contactor 40"),
+  R("relojhorario","Reloj horario / programador","ud",42,.5,"🛡️ Cuadros y protecciones",false,"reloj horario programador"),
+  R("telerruptor","Telerruptor","ud",26,.5,"🛡️ Cuadros y protecciones",false,"telerruptor"),
+  R("cuadro12","Cuadro superficie 12 módulos","ud",22,1,"🛡️ Cuadros y protecciones",false,"cuadro caja distribucion 12 modulos elementos"),
+  R("cuadro24","Cuadro superficie 24 módulos","ud",38,1.5,"🛡️ Cuadros y protecciones",false,"cuadro caja distribucion 24 modulos elementos"),
+  R("cuadro36","Cuadro superficie 36 módulos","ud",58,2,"🛡️ Cuadros y protecciones",false,"cuadro caja distribucion 36 modulos elementos"),
+  // 🔌 Cableado por secciones
+  R("cable15","Línea 1,5 mm² (m)","m",2.6,.05,"🔌 Cableado",false,"cable linea hilo 1.5 mm metro"),
+  R("cable4","Línea 4 mm² (m)","m",4.1,.07,"🔌 Cableado",false,"cable linea 4 mm metro"),
+  R("cable6","Línea 6 mm² (m)","m",5.3,.08,"🔌 Cableado",false,"cable linea 6 mm metro"),
+  R("cable16","Línea 16 mm² (m)","m",11.5,.1,"🔌 Cableado",false,"cable linea 16 mm metro"),
+  R("cable25g","Línea 25 mm² (m)","m",16,.12,"🔌 Cableado",false,"cable linea 25 mm metro"),
+  R("cablelh","Cable libre halógenos 2,5 mm² (m)","m",4.2,.06,"🔌 Cableado",false,"cable libre halogenos 2.5"),
+  R("mang3g15","Manguera 3G1,5 (m)","m",2.9,.06,"🔌 Cableado",false,"manguera 3 g 1.5 x metro"),
+  R("mang3g25","Manguera 3G2,5 (m)","m",3.9,.07,"🔌 Cableado",false,"manguera 3 g 2.5 x metro"),
+  R("mang5g25","Manguera 5G2,5 (m)","m",5.2,.08,"🔌 Cableado",false,"manguera 5 g 2.5 x metro"),
+  R("corrugado20","Tubo corrugado 20 mm (m)","m",1.1,.05,"🔌 Cableado",false,"tubo corrugado 20 forroplast"),
+  R("corrugado25","Tubo corrugado 25 mm (m)","m",1.4,.05,"🔌 Cableado",false,"tubo corrugado 25 forroplast"),
+  R("rigido20","Tubo rígido PVC 20 mm (m)","m",2.2,.08,"🔌 Cableado",false,"tubo rigido pvc 20"),
+  R("canaleta","Canaleta PVC (m)","m",3.4,.12,"🔌 Cableado",false,"canaleta moldura pvc"),
+  R("cajaemp","Caja de empalme / registro","ud",3.2,.3,"🔌 Cableado",false,"caja empalme registro derivacion"),
+  R("cajamec","Caja de mecanismo empotrar","ud",0.9,.15,"🔌 Cableado",false,"caja mecanismo empotrar universal"),
+  // ⚡ Eléctrico general ampliado
+  R("timbre","Timbre / zumbador","ud",18,.5,"⚡ Eléctrico general",false,"timbre zumbador campana puerta"),
+  R("termo50","Termo eléctrico 50 L instalado","ud",165,2,"⚡ Eléctrico general",false,"termo electrico calentador acumulador agua 50 litro"),
+  R("termo80","Termo eléctrico 80 L instalado","ud",195,2,"⚡ Eléctrico general",false,"termo electrico calentador acumulador agua 80 litro"),
+  R("termo100","Termo eléctrico 100 L instalado","ud",235,2.5,"⚡ Eléctrico general",false,"termo electrico calentador acumulador agua 100 litro"),
+  R("extractorbano","Extractor de baño","ud",28,.8,"⚡ Eléctrico general",false,"extractor ventilacion bano aseo"),
+  R("ventiladortecho","Ventilador de techo","ud",65,1.2,"⚡ Eléctrico general",false,"ventilador techo aspas"),
+  // ❄️ / 🏠 / 📡 / ☀️ sueltos
+  R("split7","Split pared 7 kW (instalación básica)","ud",1150,4,"❄️ Climatización",false,"aire acondicionado split pared 7"),
+  R("shelly","Relé WiFi (tipo Shelly)","ud",18,.5,"🏠 Domótica",false,"rele wifi shelly domotica"),
+  R("apwifi","Punto de acceso WiFi","ud",55,.8,"📡 Telecomunicaciones",false,"wifi repetidor punto acceso router"),
+  R("optimizador","Optimizador de potencia (por panel)","ud",45,.3,"☀️ Fotovoltaica",false,"optimizador potencia"),
+  // 📦 y 👷
+  R("peqmat","Pequeño material (tornillería, tacos, bridas, cinta…)","ud",15,0,"📦 General",false,"pequeno material tornilleria taco brida cinta terminal"),
+  R("ayudante","Hora ayudante","h",22,0,"👷 Mano de obra",true,"hora ayudante peon")
   ];
 }
 /* ================= PLANTILLAS DE PRESUPUESTO ================= */
@@ -314,7 +486,8 @@ const PLANTILLAS = [
 /* ================= ESTADO ================= */
 let state = {
   config: {empresa:{nombre:"",nif:"",telefono:"",email:"",logo:""}, margen:28, iva:21, conIva:false, prefijo:"PV", prefijoParte:"PT",
-           condiciones:"Presupuesto válido 30 días. No incluye trabajos no especificados."},
+           condiciones:"Presupuesto válido 30 días. No incluye trabajos no especificados.",
+           sellos:"Instalador autorizado · Garantía en todos los trabajos · Materiales de primeras marcas"},
   precios: preciosReferencia(),
   presupuestos: [],
   partes: [],
@@ -337,6 +510,7 @@ function migrar(d){
   if (!Array.isArray(d.clientes)) d.clientes = [];
   if (!Array.isArray(d.diario)) d.diario = [];
   if (!d.config.prefijoParte) d.config.prefijoParte = "PT";
+  if (d.config.sellos == null) d.config.sellos = "Instalador autorizado · Garantía en todos los trabajos · Materiales de primeras marcas";
   const ref = preciosReferencia();
   d.precios.forEach(p => {
     if (!p.fam || p.tiempo == null){
@@ -345,11 +519,12 @@ function migrar(d){
       else { p.fam = p.fam || "📦 General"; if (p.tiempo == null) p.tiempo = 0; }
     }
   });
+  d.precios.forEach(p => { if (!p.al){ const r = ref.find(x => x.k === p.k); if (r && r.al) p.al = r.al; } }); // alias de dictado
   ref.forEach(r => { if (!d.precios.some(p => p.k === r.k)) d.precios.push(r); }); // nuevas referencias al actualizar la app
   return d;
 }
 let tGuardar = null;
-function guardarLocal(){ if (!almacen) return; try { almacen.setItem(CLAVE_ALMACEN, JSON.stringify(state)); } catch(e){} }
+function guardarLocal(){ if (almacen){ try { almacen.setItem(CLAVE_ALMACEN, JSON.stringify(state)); } catch(e){} } pvSyncProgramar(); }
 function marcarCambio(){ cambiosSinGuardar = !almacen; clearTimeout(tGuardar); tGuardar = setTimeout(guardarLocal, 400); }
 if (almacen){
   try { const d = JSON.parse(almacen.getItem(CLAVE_ALMACEN)); if (d && d.config && Array.isArray(d.precios)) state = migrar(d); } catch(e){}
@@ -360,9 +535,12 @@ window.addEventListener("beforeunload", e => {
 function precioDe(k){ return state.precios.find(p => p.k === k); }
 function siguienteNumero(tipo){
   const anio = new Date().getFullYear();
-  const pref = tipo === "parte" ? (state.config.prefijoParte || "PT") : state.config.prefijo;
+  const base = tipo === "parte" ? (state.config.prefijoParte || "PT") : state.config.prefijo;
+  // Con la sincronización en equipo activada, cada operario numera con sus iniciales
+  // (PV-J-2026-001, PV-S-2026-001…) para que no choquen los números al trabajar sin cobertura.
+  const pref = base + ((sync.cfg && sync.cfg.iniciales) ? "-" + sync.cfg.iniciales : "");
   const lista = tipo === "parte" ? (state.partes || []) : state.presupuestos;
-  const re = new RegExp(`^${pref}-${anio}-(\\d+)$`);
+  const re = new RegExp("^" + pref.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + `-${anio}-(\\d+)$`);
   let max = 0;
   lista.forEach(x => { const m = re.exec(x.numero||""); if(m) max = Math.max(max,+m[1]); });
   return `${pref}-${anio}-${String(max+1).padStart(3,"0")}`;
@@ -379,11 +557,8 @@ function aNum(s){
   return NUM_PAL[normalizar(String(s)).trim()] ?? null;
 }
 const PAT_NUM = "(\\d+[.,]?\\d*|un|uno|una|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez|once|doce|trece|catorce|quince|dieciseis|veinte|veinticinco|treinta|cuarenta|cincuenta|sesenta|ochenta|cien)";
-function analizar(texto){
+function analizarReglas(texto, lineas, usado){
   const t = " " + normalizar(texto) + " ";
-  const lineas = [];
-  const usado = new Set();
-  const M = 1 + state.config.margen/100;
   const add = (k, cant, nombreExtra) => {
     const it = precioDe(k);
     if (!it || usado.has(k)) return;
@@ -457,6 +632,96 @@ function analizar(texto){
       m = t.match(new RegExp(PAT_NUM + "\\s*horas?"));
       if (m) add("hora", aNum(m[1]));
     }
+  }
+  return lineas;
+}
+/* ===== Reconocimiento por segmentos contra TODA la base de precios (v2) =====
+   Trocea el dictado en grupos «cantidad + material» («8 enchufes bjc 2 interruptores bjc
+   y 2 downlight de superficie 18 w») y busca cada uno en la base con sinónimos.
+   Lo que no reconoce se lo pasa a las reglas de siempre (paneles, inversores, mano de obra…). */
+const STOP_SEG = new Set("de del la el lo los las un una unos unas y con para en a al por que tipo marca modelo cada mas e o u otro otra amperio amperios poner ponme pon instalar instalando instalacion colocar colocando cambiar sustituir montar quiero necesito falta llevar puesto puesta incluye incluido incluida nuevo nueva nuevos nuevas".split(" "));
+const UNIDAD_SEG = new Set(["w","kw","kwh","va","kva","v","mm","mm2","m","mt","metr","ml","cm","lm","litr","kg","modul","element","pol"]);
+const ATRIBUTO_PREVIO = new Set(["de","del","a","x","por","cada","seccion","tipo"]);
+const SINONIMOS_SEG = {toma:"enchufe", schuko:"enchufe", clavija:"enchufe", foco:"downlight", halogeno:"downlight", empotrable:"empotrar", empotrado:"empotrar", empotrada:"empotrar", llave:"interruptor", apagador:"interruptor", automatico:"magnetotermico", pia:"magnetotermico", placa:"panel", pantalla:"regleta", fluorescente:"regleta", intemperie:"estanco", exterior:"estanco", television:"tv", tele:"tv", luce:"luz", vatio:"w", kilovatio:"kw", watio:"w", tirada:"cable", hilo:"linea", cablecillo:"linea", calentador:"termo"};
+// Raíz común: quita la -s del plural y la vocal final («enchufes»→«enchuf», «enchufe»→«enchuf»,
+// «interruptores»→«interruptor», «estanca/estanco»→«estanc»). Se aplica igual al dictado y a la base.
+function raizSeg(t){
+  if (t.length > 3 && t.endsWith("s")) t = t.slice(0, -1);
+  if (t.length > 3 && "aeo".includes(t[t.length - 1])) t = t.slice(0, -1);
+  return t;
+}
+function tokensSeg(s){
+  const crudo = normalizar(String(s))
+    .replace(/(\d),(\d)/g, "$1.$2")
+    .replace(/([0-9])([a-zñ])/g, "$1 $2")
+    .replace(/([a-zñ])([0-9])/g, "$1 $2")
+    .replace(/[^a-z0-9ñ.]+/g, " ")
+    .split(/\s+/).filter(Boolean);
+  const res = [];
+  crudo.forEach(t => {
+    t = t.replace(/^\.+|\.+$/g, ""); if (!t) return;
+    if (/^\d+(\.\d+)?$/.test(t)){ res.push(t.replace(/\.0+$/, "")); return; }
+    if (t.length === 1 && !"wvmlg".includes(t)) return;
+    if (STOP_SEG.has(t)) return;
+    const sinS = (t.length > 3 && t.endsWith("s")) ? t.slice(0, -1) : t;
+    const sin = SINONIMOS_SEG[t] || SINONIMOS_SEG[sinS];
+    res.push(raizSeg(sin || sinS));
+  });
+  return res;
+}
+function analizarSegmentos(texto, lineas, usado){
+  const porClave = new Map(), restos = [];
+  const esNum = w => /^\d+(\.\d+)?$/.test(w) || NUM_PAL[w] != null;
+  const norm = normalizar(String(texto)).replace(/(\d),(\d)/g, "$1.$2");
+  const frags = norm.split(/[;\n]|\.(?!\d)|,|\s+y\s+|\s+mas\s+|\s+tambien\s+|\s+ademas\s+|\s+luego\s+|\s+despues\s+/);
+  frags.forEach(f => {
+    const palabras = (f || "").trim().split(/\s+/).filter(Boolean);
+    if (!palabras.length) return;
+    const grupos = []; let actual = [];
+    palabras.forEach((w, i) => {                      // «8 enchufes bjc 2 interruptores» → corta antes de cada cantidad
+      const prev = palabras[i-1], sig = palabras[i+1];
+      if (esNum(w) && actual.length && prev && !ATRIBUTO_PREVIO.has(prev) && !esNum(prev) && sig != null && !UNIDAD_SEG.has((tokensSeg(sig)[0] || ""))){
+        grupos.push(actual); actual = [];
+      }
+      actual.push(w);
+    });
+    if (actual.length) grupos.push(actual);
+    grupos.forEach(g => {
+      let cant = 1, resto = g;
+      if (esNum(g[0]) && g.length > 1){ cant = aNum(g[0]) || 1; resto = g.slice(1); }
+      const desc = tokensSeg(resto.join(" "));
+      let mejor = null, mejorP = 0;
+      if (desc.length){
+        state.precios.forEach(it => {
+          if (it.esMO) return;                        // la mano de obra la llevan las reglas de siempre
+          const conjunto = new Set(tokensSeg((it.nombre || "") + " " + (it.al || "")));
+          let aciertos = 0, palabra = false;
+          desc.forEach(tk => { if (conjunto.has(tk)){ aciertos++; if (!/^\d/.test(tk) && !UNIDAD_SEG.has(tk) && tk.length >= 2) palabra = true; } });
+          const p = aciertos / desc.length;
+          if (palabra && p > mejorP){ mejorP = p; mejor = it; }
+        });
+      }
+      if (mejor && mejorP >= 0.65){
+        if (porClave.has(mejor.k)) porClave.get(mejor.k).cant += cant;
+        else if (!usado.has(mejor.k)){
+          usado.add(mejor.k);
+          const l = {concepto: mejor.nombre, cant, unidad: mejor.unidad, precio: mejor.precio, tiempo: mejor.tiempo || 0, esMO: !!mejor.esMO};
+          porClave.set(mejor.k, l); lineas.push(l);
+        }
+      } else restos.push(g.join(" "));
+    });
+  });
+  return restos.join(" , ");
+}
+function analizar(texto){
+  const lineas = [], usado = new Set();
+  const resto = analizarSegmentos(texto, lineas, usado);
+  analizarReglas(resto, lineas, usado);
+  // si los paneles entraron por segmentos, añade su estructura (como hacían las reglas)
+  const mod = lineas.find(l => /Módulo FV/i.test(l.concepto));
+  if (mod && !usado.has("estructura")){
+    const it = precioDe("estructura");
+    if (it) lineas.push({concepto: it.nombre, cant: mod.cant, unidad: it.unidad, precio: it.precio, tiempo: it.tiempo || 0, esMO: false});
   }
   return lineas;
 }
@@ -591,6 +856,8 @@ function pintarNav(){
   const badge = k => (k === "asistente" && n) ? `<span class="badge">${n}</span>` : "";
   $("#nav").innerHTML = PESTANAS.map(([k,t]) => `<button class="${act===k?"activo":""}" onclick="irA('${k}')" style="position:relative">${t}${badge(k)}</button>`).join("");
   $("#nav-movil").innerHTML = PESTANAS.map(([k,t,ico,corto]) => `<button class="${act===k?"activo":""}" onclick="irA('${k}')" style="position:relative"><span class="ico">${ico}</span>${corto}${badge(k)}</button>`).join("");
+  const le = document.getElementById("logo-emp");
+  if (le) le.innerHTML = state.config.empresa.logo ? `<img src="${state.config.empresa.logo}" alt="logo" style="max-height:36px;max-width:96px;border-radius:6px;background:#fff;padding:2px">` : "";
 }
 function render(){
   pintarNav();
@@ -636,7 +903,7 @@ function htmlNota(){
     <div class="estado-voz" id="estado-voz">${grabando?"Grabando… pulsa para parar":"Pulsa para hablar"}</div>
     <div style="margin-top:6px"><span class="chip ${iaDisponible()?"aceptado":"ref"}">${iaDisponible()?"🧠 IA activada":"⚙️ modo sin conexión"}</span></div>
     <textarea id="texto-nota" placeholder="…o escribe aquí la descripción de la obra a mano." oninput="textoNota=this.value">${esc(textoNota)}</textarea>
-    <p class="ejemplo">Ejemplo: «Chalet en Villaviciosa, autoconsumo de 5 kW con 10 paneles de 550, inversor híbrido, tirada de unos 25 metros, cuadro nuevo con protecciones, legalización incluida y 2 operarios 2 jornadas.»</p>
+    <p class="ejemplo">Ejemplos: «8 enchufes BJC, 2 interruptores BJC y 2 downlight de superficie de 18 W» · «Chalet en Villaviciosa, autoconsumo de 5 kW con 10 paneles de 550, inversor híbrido, tirada de unos 25 metros, cuadro nuevo con protecciones, legalización incluida y 2 operarios 2 jornadas.»</p>
     <div class="pie-form" style="justify-content:center">
       <button class="btn amarillo" onclick="calcular('presu')">⚡ Calcular presupuesto</button>
       <button class="btn sec" onclick="calcular('parte')">🛠️ Crear parte</button>
@@ -702,12 +969,13 @@ function htmlEditor(){
     <div class="caja-totales" id="totales">${htmlTotales(t,p)}</div>
     <p class="nota-privada">🔒 Coste, margen y beneficio son privados: el cliente solo ve los precios de venta.</p>
     <div style="margin-top:12px"><label>Observaciones para el cliente</label><textarea oninput="editando.observaciones=this.value">${esc(p.observaciones)}</textarea></div>
-    ${p.tipo === "parte" ? `<h3 class="sub">📷 Fotos de la obra</h3>
+    <h3 class="sub">📷 ${p.tipo === "parte" ? "Fotos de la obra" : "Fotos (la obra, la visita o trabajos parecidos que hayas hecho — venden mucho)"}</h3>
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
       ${(p.fotos||[]).map((f,fi)=>`<span style="position:relative"><img src="${f}" style="height:74px;border-radius:8px;border:1.5px solid var(--linea)"><button class="btn-icono" style="position:absolute;top:-6px;right:-6px;background:#fff;border:1px solid var(--linea);border-radius:50%;font-size:11px;padding:2px 5px" onclick="editando.fotos.splice(${fi},1);render()">✕</button></span>`).join("")}
       <button class="btn sec mini" onclick="document.getElementById('foto-input').click()">📷 Añadir foto</button>
       <input type="file" id="foto-input" accept="image/*" capture="environment" style="display:none" onchange="anadirFoto(event)">
-    </div>` : ""}
+      <span style="color:var(--gris);font-size:.8rem">Salen en el PDF (máx. 6)</span>
+    </div>
     <div style="margin-top:12px"><label>Estado</label><select onchange="editando.estado=this.value;if(this.value==='aceptado'&&editando.tipo!=='parte')festejar(totales(editando).total)" style="max-width:220px">
       ${(p.tipo === "parte" ? ["pendiente","facturado"] : ["borrador","enviado","aceptado"]).map(e=>`<option value="${e}" ${p.estado===e?"selected":""}>${e[0].toUpperCase()+e.slice(1)}</option>`).join("")}</select></div>
     ${p.tipo === "parte" ? `<h3 class="sub">✍️ Firma del cliente</h3>
@@ -718,6 +986,7 @@ function htmlEditor(){
     </div>` : ""}
     <div class="pie-form">
       <button class="btn sec" onclick="vista='nota';render()">← Volver a la nota</button>
+      <button class="btn sec" onclick="if(guardar(true)) verPrevio(editando.id)">👁️ Ver presupuesto</button>
       <button class="btn sec" onclick="if(guardar(true)) imprimir(editando.id)">🖨️ PDF</button>
       <button class="btn wa" onclick="if(guardar(true)) porWhatsApp(editando.id)">💬 WhatsApp</button>
       <button class="btn amarillo" onclick="guardar()">💾 Guardar</button>
@@ -1079,6 +1348,7 @@ function htmlLista(tipo){
       <td class="num">${eur(t.total)}</td>
       <td><span class="chip ${p.estado}">${p.estado}</span></td>
       <td onclick="event.stopPropagation()" style="white-space:nowrap">
+        <button class="btn-icono" title="Ver documento" onclick="verPrevio('${p.id}')">👁️</button>
         <button class="btn-icono" title="PDF" onclick="imprimir('${p.id}')">🖨️</button>
         <button class="btn-icono" title="WhatsApp" onclick="porWhatsApp('${p.id}')">💬</button>
         <button class="btn-icono" title="Eliminar" onclick="borrar('${p.id}')">🗑️</button>
@@ -1090,6 +1360,7 @@ function htmlLista(tipo){
       <div class="ti-sub">${fFecha(p.fecha)}${p.obra?" · "+esc(p.obra):""}</div>
       <div class="ti-pie"><span class="ti-total">${eur(t.total)}</span>
         <span onclick="event.stopPropagation()">
+          <button class="btn-icono" onclick="verPrevio('${p.id}')">👁️</button>
           <button class="btn-icono" onclick="imprimir('${p.id}')">🖨️</button>
           <button class="btn-icono" onclick="porWhatsApp('${p.id}')">💬</button>
           <button class="btn-icono" onclick="borrar('${p.id}')">🗑️</button>
@@ -1177,6 +1448,7 @@ function htmlAjustes(){
     </div>
     <div style="margin-top:12px"><label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-family:'Barlow';font-size:.95rem;color:var(--grafito)"><input type="checkbox" style="width:auto" ${state.config.conIva?"checked":""} onchange="state.config.conIva=this.checked;marcarCambio()"> Incluir IVA en los totales por defecto</label></div>
     <div style="margin-top:12px"><label>Condiciones (pie del PDF)</label><textarea oninput="state.config.condiciones=this.value;marcarCambio()">${esc(state.config.condiciones)}</textarea></div>
+    <div style="margin-top:12px"><label>Sellos de confianza (salen arriba del presupuesto, separados por ·)</label><input value="${esc(state.config.sellos||"")}" oninput="state.config.sellos=this.value;marcarCambio()" placeholder="Instalador autorizado · Garantía en todos los trabajos"></div>
     <div class="sep"></div>
     <h3 class="sub">🧠 Inteligencia artificial (opcional)</h3>
     <p style="font-size:.9rem;color:var(--gris);margin-bottom:10px">Con tu clave de la API de Claude, los dictados largos se entienden con contexto completo: la IA redacta el parte, identifica cliente y obra, y genera presupuestos completos con todo lo necesario. Se paga por uso a Anthropic (céntimos por dictado). La clave se guarda <strong>solo en este dispositivo</strong> y solo se usa para llamar a la API. Sin clave, funciona el analizador gratuito sin conexión. Consigue tu clave en <strong>console.anthropic.com</strong> → API keys.</p>
@@ -1192,13 +1464,21 @@ function htmlAjustes(){
       <button class="btn amarillo" onclick="exportarDatos()">💾 Descargar copia</button>
       <button class="btn sec" onclick="document.getElementById('importar').click()">📂 Cargar copia</button>
     </div>
+    ${htmlSyncAjustes()}
   </div>`;
 }
 function subirLogo(ev){
   const f = ev.target.files[0]; if(!f) return;
-  const r = new FileReader();
-  r.onload = () => { state.config.empresa.logo = r.result; marcarCambio(); render(); };
-  r.readAsDataURL(f);
+  const img = new Image();
+  img.onload = () => {                                     // redimensiona para que pese poco (PDF, sync y almacenamiento)
+    const c = document.createElement("canvas");
+    const e2 = Math.min(1, 420 / Math.max(img.width, img.height));
+    c.width = Math.max(1, Math.round(img.width * e2)); c.height = Math.max(1, Math.round(img.height * e2));
+    c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+    state.config.empresa.logo = c.toDataURL("image/png");
+    URL.revokeObjectURL(img.src); marcarCambio(); render();
+  };
+  img.src = URL.createObjectURL(f); ev.target.value = "";
 }
 /* ================= MOTOR IA (con tu propia clave) ================= */
 function iaDisponible(){ return !!(state.config.apiKey && state.config.apiKey.trim()); }
@@ -1288,24 +1568,43 @@ function abrirFirma(){
 function limpiarFirma(){ const c = $("#lienzo-firma"), ctx = c.getContext("2d"); ctx.fillStyle = "#fff"; ctx.fillRect(0,0,c.width,c.height); }
 function guardarFirma(){ editando.firma = $("#lienzo-firma").toDataURL("image/png"); marcarCambio(); cerrarModal(); render(); }
 /* ================= PDF / WHATSAPP ================= */
+function famLinea(l){
+  const it = state.precios.find(x => x.nombre === l.concepto);
+  const f = it && it.fam ? it.fam : (l.esMO ? "👷 x" : "⚡ x");
+  return f.split(" ")[0];
+}
+function validezDe(p){
+  if (p.tipo === "parte" || !p.fecha) return "";
+  const d = new Date(p.fecha); d.setDate(d.getDate() + 30);
+  return fFecha(d.toISOString().slice(0, 10));
+}
 function docHtml(p){
   const e = state.config.empresa, t = totales(p);
+  const esPresu = p.tipo !== "parte";
   const lin = (p.lineas||[]).filter(l=>l.concepto).map(l =>
-    `<div class="l"><span class="c">${l.cant && +l.cant !== 1 ? esc(l.cant)+ (l.unidad==="m"?" m ":"× ") : ""}${esc(l.concepto)}</span><span class="i">${eur(ventaLinea(l,p.margen))}</span></div>`).join("");
+    `<div class="l"><span class="c"><span class="doc-ico">${famLinea(l)}</span>${l.cant && +l.cant !== 1 ? esc(l.cant)+ (l.unidad==="m"?" m ":"× ") : ""}${esc(l.concepto)}</span><span class="i">${eur(ventaLinea(l,p.margen))}</span></div>`).join("");
+  const validez = validezDe(p);
+  const he = horasEstimadas(p);
+  const sellos = String(state.config.sellos || "").split("·").map(s => s.trim()).filter(Boolean);
+  const fotos = (p.fotos || []).slice(0, 6);
   return `<div class="doc"><div class="doc-cinta"></div>
     <div class="doc-cab">
       <div style="display:flex;gap:14px;align-items:flex-start">
         ${e.logo?`<img src="${e.logo}">`:""}
         <div class="emp"><strong>${esc(e.nombre||"Tu empresa")}</strong><br>
           ${e.nif?"NIF: "+esc(e.nif)+"<br>":""}${esc(e.telefono||"")}${e.telefono&&e.email?" · ":""}${esc(e.email||"")}</div></div>
-      <div class="doc-tit"><h2>${p.tipo === "parte" ? "Parte de trabajo" : "Presupuesto"}</h2><div>Nº ${esc(p.numero)}</div><div>${fFecha(p.fecha)}</div></div>
+      <div class="doc-tit"><h2>${esPresu ? "Presupuesto" : "Parte de trabajo"}</h2><div>Nº ${esc(p.numero)}</div><div>${fFecha(p.fecha)}</div>${validez?`<div class="doc-validez">📅 Válido hasta ${validez}</div>`:""}</div>
     </div>
+    ${sellos.length?`<div class="doc-badges">${sellos.map(s=>`<span>✓ ${esc(s)}</span>`).join("")}</div>`:""}
     ${p.cliente||p.obra?`<div class="doc-cliente"><strong>${esc(p.cliente||"")}</strong>${p.cliente&&p.obra?" · ":""}${esc(p.obra||"")}</div>`:""}
     <div class="doc-lineas"><div class="cab"><span>Concepto</span><span>Importe</span></div>${lin}</div>
     ${p.conIva?`<div class="doc-iva"><span>Base imponible</span><span>${eur(t.venta)}</span></div><div class="doc-iva"><span>IVA (${p.iva}%)</span><span>${eur(t.iva)}</span></div>`:""}
     <div class="doc-total"><span>TOTAL${p.conIva?"":" (IVA no incl.)"}</span><span>${eur(t.total)}</span></div>
+    ${esPresu && he ? `<div class="doc-dato"><span>⏱️ Ejecución estimada: ${Math.max(1,Math.ceil(he/8))} jornada${Math.ceil(he/8)>1?"s":""}</span><span>📆 Fecha: a acordar contigo</span><span>🧾 Precio con materiales y mano de obra</span></div>` : ""}
+    ${fotos.length?`<div class="doc-fotos">${fotos.map(f=>`<img src="${f}">`).join("")}</div>`:""}
     ${p.observaciones?`<div class="obs">${esc(p.observaciones)}</div>`:""}
-    ${p.tipo === "parte" ? `<div class="doc-firmas">
+    ${esPresu ? `<div class="doc-cta"><strong>¿Te encaja?</strong> Escríbenos por WhatsApp${e.telefono?` al <strong>${esc(e.telefono)}</strong>`:""} o llámanos y reservamos fecha. Sin compromiso — cualquier duda te la resolvemos al momento.</div>` : ""}
+    ${!esPresu ? `<div class="doc-firmas">
       <div><div class="hueco"></div><div class="linea">Firma del técnico</div></div>
       <div><div class="hueco">${p.firma?`<img src="${p.firma}">`:""}</div><div class="linea">Conforme del cliente</div></div>
     </div>` : ""}
@@ -1317,11 +1616,36 @@ function imprimir(id){
   $("#zona-impresion").innerHTML = docHtml(p);
   setTimeout(()=>window.print(), 60);
 }
+function verPrevio(id){
+  const p = buscarDoc(id); if(!p) return;
+  $("#modal").innerHTML = `<div style="position:fixed;inset:0;background:rgba(26,28,30,.72);z-index:120;display:flex;align-items:center;justify-content:center;padding:10px" onclick="if(event.target===this)cerrarModal()">
+    <div style="background:#fff;border-radius:12px;max-width:840px;width:100%;max-height:94vh;display:flex;flex-direction:column;overflow:hidden">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-bottom:1.5px solid var(--linea)">
+        <h3 class="sub" style="margin:0">👁️ Así lo verá el cliente</h3>
+        <button class="btn-icono" onclick="cerrarModal()">✕</button></div>
+      <div style="overflow:auto;padding:16px 10px;background:#eceae4"><div style="background:#fff;border-radius:8px;box-shadow:0 4px 18px rgba(26,28,30,.15);padding:18px 6px;max-width:790px;margin:0 auto">${docHtml(p)}</div></div>
+      <div class="pie-form" style="padding:10px 14px;margin:0;border-top:1.5px solid var(--linea)">
+        <button class="btn sec mini" onclick="cerrarModal()">← Seguir editando</button>
+        <button class="btn sec mini" onclick="cerrarModal();imprimir('${p.id}')">🖨️ PDF</button>
+        <button class="btn wa mini" onclick="cerrarModal();porWhatsApp('${p.id}')">💬 Enviar por WhatsApp</button>
+      </div></div></div>`;
+}
 function porWhatsApp(id){
   const p = buscarDoc(id); if(!p) return;
   const t = totales(p);
-  const lin = (p.lineas||[]).filter(l=>l.concepto).map(l=>`• ${l.concepto}: ${eur(ventaLinea(l,p.margen))}`).join("\n");
-  const txt = `Hola${p.cliente?" "+p.cliente:""}, te paso el ${p.tipo==="parte"?"parte de trabajo":"presupuesto"} ${p.numero}${p.obra?" ("+p.obra+")":""}:\n${lin}\nTOTAL: ${eur(t.total)}${p.conIva?" (IVA incluido)":" (IVA no incluido)"}`;
+  const esPresu = p.tipo !== "parte";
+  const emp = state.config.empresa.nombre;
+  const validez = validezDe(p);
+  const he = horasEstimadas(p);
+  const lin = (p.lineas||[]).filter(l=>l.concepto).map(l=>`${famLinea(l)} ${l.cant && +l.cant !== 1 ? l.cant + (l.unidad==="m"?" m ":"× ") : ""}${l.concepto} — ${eur(ventaLinea(l,p.margen))}`).join("\n");
+  const txt = `Hola${p.cliente?" "+p.cliente:""} 👋\n`
+    + (emp ? `⚡ *${emp}*\n` : "")
+    + `📋 *${esPresu?"Presupuesto":"Parte de trabajo"} ${p.numero}*${p.obra?` — ${p.obra}`:""}\n`
+    + `━━━━━━━━━━━━\n${lin}\n━━━━━━━━━━━━\n`
+    + `💰 *TOTAL: ${eur(t.total)}*${p.conIva?" (IVA incluido)":" (IVA no incluido)"}`
+    + (validez ? `\n📅 Válido hasta ${validez}` : "")
+    + (esPresu && he ? `\n⏱️ Ejecución estimada: ${Math.max(1,Math.ceil(he/8))} jornada${Math.ceil(he/8)>1?"s":""}` : "")
+    + (esPresu ? `\n\n✅ ¿Te encaja? Respóndeme por aquí y reservamos fecha. Cualquier duda me preguntas sin compromiso 😊` : "");
   let d = String(p.telefono||"").replace(/\D/g,"");
   if (d.length === 9) d = "34" + d;
   window.open((d?`https://wa.me/${d}`:"https://wa.me/") + "?text=" + encodeURIComponent(txt), "_blank");
@@ -1348,7 +1672,247 @@ function importarDatos(ev){
   };
   r.readAsText(f); ev.target.value = "";
 }
+/* ================= SINCRONIZACIÓN EN EQUIPO (Firebase Firestore) =================
+   Diseño v1: último-en-escribir-gana por documento, borrados con marca (eliminado:true),
+   cada documento lleva actualizadoEn + dispositivo. La clave de IA y los ajustes
+   personales NO se sincronizan. Funciona offline: Firestore guarda la cola en el
+   dispositivo y la sube sola al volver la señal. */
+const CLAVE_SYNC = "presuvolt-sync";
+const URL_FIREBASE = "https://www.gstatic.com/firebasejs/10.12.2/";
+const sync = {activo:false, listo:{}, fs:null, db:null, cfg:null, estado:"apagado", error:"", ultimo:0, pendientes:0, shadow:{}, unsubs:[], timer:null, hb:null, equipo:[]};
+const COLS_SYNC = [
+  {n:"clientes",     lista:()=>state.clientes},
+  {n:"presupuestos", lista:()=>state.presupuestos},
+  {n:"partes",       lista:()=>state.partes},
+  {n:"diario",       lista:()=>state.diario},
+  {n:"precios",      lista:()=>state.precios, clave:"k"}
+];
+const CONFIG_COMPARTIDA = ["empresa","margen","iva","conIva","condiciones","sellos"]; // apiKey, modeloIA, prefijos, objetivo… se quedan en el dispositivo
+function idSync(c, item){ return String(item[c.clave || "id"] || "").replace(/[\/.#$\[\]]/g, "_"); }
+function limpiarObj(o){ return JSON.parse(JSON.stringify(o)); }
+function jsonCanonico(v){
+  if (Array.isArray(v)) return "[" + v.map(jsonCanonico).join(",") + "]";
+  if (v && typeof v === "object") return "{" + Object.keys(v).sort().map(k => JSON.stringify(k) + ":" + jsonCanonico(v[k])).join(",") + "}";
+  return JSON.stringify(v === undefined ? null : v);
+}
+function configCompartida(){
+  const o = {};
+  CONFIG_COMPARTIDA.forEach(k => { if (state.config[k] !== undefined) o[k] = state.config[k]; });
+  const l = limpiarObj(o);
+  // Firestore limita cada documento a 1 MB: si el logo es enorme, no se comparte (cada uno puede subir el suyo)
+  if (l.empresa && jsonCanonico(l).length > 900000) l.empresa = Object.assign({}, l.empresa, {logo: ""});
+  return l;
+}
+function leerCfgSync(){ try { return JSON.parse(localStorage.getItem(CLAVE_SYNC)); } catch(e){ return null; } }
+function guardarCfgSync(c){ try { localStorage.setItem(CLAVE_SYNC, JSON.stringify(c)); } catch(e){} }
+function parseFirebaseCfg(txt){
+  const out = {};
+  ["apiKey","authDomain","projectId","storageBucket","messagingSenderId","appId"].forEach(k => {
+    const m = String(txt || "").match(new RegExp('["\']?' + k + '["\']?\\s*[:=]\\s*["\']([^"\']+)["\']'));
+    if (m) out[k] = m[1];
+  });
+  return out;
+}
+function chipSync(){
+  const el = document.getElementById("chip-sync");
+  if (!el) return;
+  if (!sync.activo){ el.style.display = "none"; return; }
+  el.style.display = "";
+  el.textContent = !navigator.onLine ? "📴 pendiente" :
+    sync.pendientes > 0 ? "⏳ subiendo…" :
+    sync.estado === "error" ? "⚠️ sync" :
+    sync.estado === "conectando" ? "☁️ conectando…" : "☁️ sincronizado";
+}
+function programarRenderSync(){ if (vista !== "editor") render(); else chipSync(); }
+function refDoc(colName, id){ return sync.fs.doc(sync.db, "empresas", sync.cfg.codigo, colName, id); }
+function pvSyncProgramar(){ if (!sync.activo) return; clearTimeout(sync.timer); sync.timer = setTimeout(pvSyncPush, 800); }
+function anotarOp(prom){
+  sync.pendientes++; chipSync();
+  prom.then(() => { sync.ultimo = Date.now(); if (sync.estado !== "apagado") sync.estado = "sincronizado"; sync.error = ""; })
+      .catch(e => { sync.error = String(e && e.message || e); if (sync.activo) sync.estado = "error"; })
+      .then(() => { sync.pendientes = Math.max(0, sync.pendientes - 1); chipSync(); });
+}
+function pvSyncPush(){
+  if (!sync.activo || !sync.db || !sync.cfg) return;
+  const ahora = Date.now(), disp = sync.cfg.dispositivo;
+  COLS_SYNC.forEach(c => {
+    if (!sync.listo[c.n]) return;               // hasta recibir el estado del servidor no empujamos (evita pisar datos más nuevos)
+    const vivos = new Set();
+    (c.lista() || []).forEach(item => {
+      const id = idSync(c, item); if (!id) return;
+      vivos.add(id);
+      const key = c.n + "/" + id;
+      if (sync.shadow[key] === jsonCanonico(item)) return;
+      item.actualizadoEn = ahora; item.dispositivo = disp;
+      const datos = limpiarObj(item);
+      sync.shadow[key] = jsonCanonico(datos);
+      anotarOp(sync.fs.setDoc(refDoc(c.n, id), {datos, actualizadoEn: ahora, dispositivo: disp, eliminado: false}));
+    });
+    Object.keys(sync.shadow).forEach(key => {   // lápidas: estaba en la nube y ya no está local → marcado como eliminado
+      if (!key.startsWith(c.n + "/")) return;
+      const id = key.slice(c.n.length + 1);
+      if (vivos.has(id)) return;
+      delete sync.shadow[key];
+      anotarOp(sync.fs.setDoc(refDoc(c.n, id), {eliminado: true, actualizadoEn: ahora, dispositivo: disp}));
+    });
+  });
+  if (sync.listo.config){
+    const datos = configCompartida();
+    if (sync.shadow["config"] !== jsonCanonico(datos)){
+      sync.shadow["config"] = jsonCanonico(datos);
+      state.config.syncTs = ahora;
+      anotarOp(sync.fs.setDoc(refDoc("config", "compartida"), {datos, actualizadoEn: ahora, dispositivo: disp}));
+    }
+  }
+}
+function aplicarRemoto(colName, id, d){
+  const c = COLS_SYNC.find(x => x.n === colName); if (!c) return false;
+  const arr = c.lista(); if (!Array.isArray(arr)) return false;
+  const key = colName + "/" + id;
+  const i = arr.findIndex(x => idSync(c, x) === id);
+  // "Sucio" = tiene cambios locales aún sin subir: no se pisa; se subirá con sello nuevo y entonces ganará (último en escribir gana)
+  const sucio = i >= 0 && sync.shadow[key] !== undefined && sync.shadow[key] !== jsonCanonico(arr[i]);
+  if (d.eliminado){
+    delete sync.shadow[key];
+    if (i >= 0 && !sucio && (d.actualizadoEn || 0) >= (arr[i].actualizadoEn || 0)){ arr.splice(i, 1); return true; }
+    return false;
+  }
+  const datos = d.datos || {};
+  sync.shadow[key] = jsonCanonico(datos);
+  if (i < 0){ arr.push(datos); return true; }
+  if (!sucio && (d.actualizadoEn || 0) > (arr[i].actualizadoEn || 0)){ arr[i] = datos; return true; }
+  return false;
+}
+function aplicarConfigRemota(d){
+  sync.shadow["config"] = jsonCanonico(d.datos || {});
+  if ((d.actualizadoEn || 0) > (state.config.syncTs || 0)){
+    Object.assign(state.config, limpiarObj(d.datos || {}));
+    state.config.syncTs = d.actualizadoEn || Date.now();
+    return true;
+  }
+  return false;
+}
+async function conectarSync(){
+  sync.estado = "conectando"; sync.error = ""; chipSync();
+  const [appM, fsM] = await Promise.all([import(URL_FIREBASE + "firebase-app.js"), import(URL_FIREBASE + "firebase-firestore.js")]);
+  let app;
+  try { app = appM.initializeApp(sync.cfg.firebase, "presuvolt"); } catch(e){ app = appM.getApp("presuvolt"); }
+  let db;
+  try { db = fsM.initializeFirestore(app, {localCache: fsM.persistentLocalCache({tabManager: fsM.persistentMultipleTabManager()})}); }
+  catch(e){ db = fsM.getFirestore(app); }
+  sync.fs = fsM; sync.db = db; sync.activo = true; sync.listo = {};
+  COLS_SYNC.forEach(c => {
+    sync.unsubs.push(fsM.onSnapshot(fsM.collection(db, "empresas", sync.cfg.codigo, c.n), snap => {
+      let cambio = false;
+      snap.docChanges().forEach(ch => {
+        if (ch.type === "removed") return;
+        if (aplicarRemoto(c.n, ch.doc.id, ch.doc.data())) cambio = true;
+      });
+      if (!snap.metadata.fromCache){ sync.listo[c.n] = true; sync.ultimo = Date.now(); if (sync.estado !== "error") sync.estado = "sincronizado"; }
+      if (cambio){ guardarLocal(); programarRenderSync(); }
+      chipSync(); pvSyncProgramar();
+    }, err => { sync.error = String(err && err.message || err); sync.estado = "error"; chipSync(); }));
+  });
+  sync.unsubs.push(fsM.onSnapshot(fsM.doc(db, "empresas", sync.cfg.codigo, "config", "compartida"), snap => {
+    const existe = typeof snap.exists === "function" ? snap.exists() : !!snap.exists;
+    if (existe && aplicarConfigRemota(snap.data())){ guardarLocal(); programarRenderSync(); }
+    if (!snap.metadata.fromCache) sync.listo.config = true;
+    chipSync(); pvSyncProgramar();
+  }, err => { sync.error = String(err && err.message || err); sync.estado = "error"; chipSync(); }));
+  sync.unsubs.push(fsM.onSnapshot(fsM.collection(db, "empresas", sync.cfg.codigo, "dispositivos"), snap => {
+    sync.equipo = snap.docs.map(x => Object.assign({id: x.id}, x.data()));
+    if (vista === "ajustes") programarRenderSync();
+  }, () => {}));
+  latidoSync(); clearInterval(sync.hb); sync.hb = setInterval(latidoSync, 5 * 60 * 1000);
+  chipSync();
+}
+function latidoSync(){
+  if (!sync.activo || !sync.fs) return;
+  try { sync.fs.setDoc(refDoc("dispositivos", sync.cfg.dispositivo), {nombre: sync.cfg.iniciales || "—", ultimaVez: Date.now()}).catch(() => {}); } catch(e){}
+}
+function iniciarSyncSiConfigurado(){
+  const c = leerCfgSync();
+  if (c && c.firebase && c.codigo){
+    sync.cfg = c;
+    conectarSync().catch(e => { sync.error = String(e && e.message || e); sync.estado = "error"; chipSync(); });
+  }
+}
+async function activarSync(){
+  const fb = parseFirebaseCfg($("#sync-cfg").value);
+  const codigo = String($("#sync-codigo").value || "").trim().toLowerCase().replace(/\s+/g, "-").replace(/[\/.#$\[\]]/g, "");
+  const ini = String($("#sync-ini").value || "").trim().toUpperCase().replace(/[^A-ZÑ0-9]/g, "").slice(0, 3);
+  if (!fb.apiKey || !fb.projectId){ alert("No he podido leer la configuración de Firebase. Pega el bloque completo que te da la consola (con apiKey, projectId, appId…)."); return; }
+  if (codigo.length < 8){ alert("El código de empresa debe ser una frase larga y difícil de adivinar (mínimo 8 caracteres), p. ej. volt-almendralejo-7492-garcia"); return; }
+  if (!ini){ alert("Pon tus iniciales (1-3 letras). Se usan para numerar tus documentos (p. ej. PV-J-2026-001) y que no choquen con los de tu socio al trabajar sin cobertura."); return; }
+  if (!navigator.onLine){ alert("Para activar la sincronización necesitas internet la primera vez. Después ya funciona sin cobertura."); return; }
+  const previo = leerCfgSync();
+  sync.cfg = {firebase: fb, codigo, iniciales: ini, dispositivo: (previo && previo.dispositivo) || uid()};
+  guardarCfgSync(sync.cfg);
+  try {
+    await conectarSync();
+    alert("☁️ Sincronización activada. Tus datos se están subiendo a la nube.\n\nPara que tu socio vea lo mismo: en su teléfono, en Ajustes → Sincronización en equipo, tiene que pegar la misma configuración de Firebase, escribir el mismo código de empresa y poner SUS iniciales.");
+  } catch(e){
+    sync.activo = false; sync.estado = "apagado"; sync.cfg = null;
+    try { localStorage.removeItem(CLAVE_SYNC); } catch(_){}
+    alert("No se pudo activar la sincronización: " + (e && e.message || e));
+  }
+  render(); chipSync();
+}
+function desactivarSync(){
+  if (!confirm("¿Desactivar la sincronización en este dispositivo? Tus datos se quedan aquí y en la nube; simplemente dejan de sincronizarse.")) return;
+  sync.unsubs.forEach(u => { try { u(); } catch(e){} });
+  sync.unsubs = []; clearInterval(sync.hb); clearTimeout(sync.timer);
+  sync.activo = false; sync.estado = "apagado"; sync.shadow = {}; sync.listo = {}; sync.cfg = null; sync.equipo = []; sync.pendientes = 0;
+  try { localStorage.removeItem(CLAVE_SYNC); } catch(e){}
+  chipSync(); render();
+}
+function htmlSyncAjustes(){
+  let cuerpo;
+  if (sync.activo || sync.estado === "conectando"){
+    const eq = (sync.equipo || []).map(d => {
+      const min = Math.round((Date.now() - (d.ultimaVez || 0)) / 60000);
+      const est = min < 10 ? "🟢 en línea" : "⚪ hace " + (min < 60 ? min + " min" : Math.round(min / 60) + " h");
+      const yo = sync.cfg && d.id === sync.cfg.dispositivo;
+      return `<span class="chip ${yo ? "mio" : "ref"}">${esc(d.nombre || "—")} · ${est}${yo ? " (tú)" : ""}</span>`;
+    }).join(" ");
+    cuerpo = `
+    <p style="font-size:.92rem;margin-bottom:10px">Estado: <strong>${sync.estado === "conectando" ? "☁️ conectando…" : !navigator.onLine ? "📴 sin conexión — los cambios se guardan aquí y subirán solos al volver la señal" : sync.estado === "error" ? "⚠️ error: " + esc(sync.error) : "☁️ sincronizado en equipo"}</strong>${sync.ultimo ? ` · último sync a las ${new Date(sync.ultimo).toLocaleTimeString("es-ES", {hour: "2-digit", minute: "2-digit"})}` : ""}${sync.pendientes ? ` · ⏳ ${sync.pendientes} cambio(s) subiendo` : ""}</p>
+    <div class="rejilla c2">
+      <div><label>Código de empresa (compártelo solo con tu socio)</label><input value="${esc(sync.cfg ? sync.cfg.codigo : "")}" readonly onclick="this.select()"></div>
+      <div><label>Tus iniciales (numeración ${esc(state.config.prefijo)}${sync.cfg && sync.cfg.iniciales ? "-" + esc(sync.cfg.iniciales) : ""}-${new Date().getFullYear()}-001)</label><input value="${esc(sync.cfg ? sync.cfg.iniciales : "")}" readonly></div>
+    </div>
+    <div style="margin-top:12px"><label>Equipo conectado</label>${eq || `<span style="color:var(--gris);font-size:.9rem">De momento solo este dispositivo. Cuando tu socio active la sincronización aparecerá aquí.</span>`}</div>
+    <div class="pie-form" style="justify-content:flex-start">
+      <button class="btn sec mini" onclick="pvSyncPush();latidoSync();alert('Cambios pendientes mandados a la nube.')">🔄 Sincronizar ahora</button>
+      <button class="btn peligro mini" onclick="desactivarSync()">Desactivar en este dispositivo</button>
+    </div>
+    <p style="font-size:.8rem;color:var(--gris)">🔒 Se comparten clientes, presupuestos, partes, diario, precios y los datos de empresa. Tu clave de la IA y tus ajustes personales no salen de este dispositivo.</p>`;
+  } else {
+    cuerpo = `
+    <p style="font-size:.9rem;color:var(--gris);margin-bottom:10px">Para que tú y tu socio veáis los mismos clientes, presupuestos, partes, diario y precios — cada uno desde su teléfono y aunque estéis sin cobertura en el tajo. Hace falta una cuenta gratuita de Firebase (Google); son 5 minutos y cuesta 0 €:</p>
+    <ol style="font-size:.9rem;color:var(--gris);margin:0 0 12px 20px;line-height:1.7">
+      <li>Entra en <strong>console.firebase.google.com</strong> con tu cuenta de Google y crea un proyecto (p. ej. «presuvolt»).</li>
+      <li><strong>Firestore Database → Crear base de datos</strong>, y en la pestaña <strong>Reglas</strong> pega las reglas de la guía de sincronización.</li>
+      <li>En <strong>Configuración del proyecto → Tus apps → icono web («&lt;/&gt;»)</strong>, registra la app y copia el bloque <code>firebaseConfig</code>.</li>
+      <li>Pégalo aquí abajo, inventa el código de empresa y pásaselo a tu socio por WhatsApp.</li>
+    </ol>
+    <div style="margin-bottom:10px"><label>Configuración de Firebase (pega el bloque firebaseConfig tal cual)</label>
+      <textarea id="sync-cfg" rows="5" style="font-family:'IBM Plex Mono',monospace;font-size:13px" placeholder='const firebaseConfig = { apiKey: "AIza…", projectId: "presuvolt-xxxxx", … };'></textarea></div>
+    <div class="rejilla c2">
+      <div><label>Código de empresa (frase secreta inventada por ti)</label><input id="sync-codigo" placeholder="volt-almendralejo-7492-garcia"></div>
+      <div><label>Tus iniciales (1-3 letras, p. ej. J)</label><input id="sync-ini" maxlength="3" placeholder="J"></div>
+    </div>
+    <div class="pie-form" style="justify-content:flex-start">
+      <button class="btn amarillo" onclick="activarSync()">☁️ Activar sincronización</button>
+    </div>
+    <p style="font-size:.8rem;color:var(--gris)">🔒 Tu clave de la IA y tus ajustes personales no se comparten. Funciona sin cobertura: los cambios se apuntan en el teléfono y se suben solos al volver la señal.</p>`;
+  }
+  return `<div class="sep"></div><h3 class="sub">☁️ Sincronización en equipo</h3>${cuerpo}`;
+}
+window.addEventListener("online", () => { chipSync(); pvSyncProgramar(); });
+window.addEventListener("offline", chipSync);
 render();
+iniciarSyncSiConfigurado();
 /* ================= PWA ================= */
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
   navigator.serviceWorker.register("sw.js").catch(()=>{});
