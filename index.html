@@ -1780,13 +1780,22 @@ function aplicarRemoto(colName, id, d){
   const datos = d.datos || {};
   sync.shadow[key] = jsonCanonico(datos);
   if (i < 0){ arr.push(datos); return true; }
+  // Un precio TUYO (ref:false) nunca lo pisa el precio de referencia de fábrica de otro dispositivo:
+  // se mantiene el tuyo y se re-sube, ganando por sello más nuevo.
+  if (colName === "precios" && arr[i].ref === false && datos.ref === true) return false;
   if (!sucio && (d.actualizadoEn || 0) > (arr[i].actualizadoEn || 0)){ arr[i] = datos; return true; }
   return false;
 }
 function aplicarConfigRemota(d){
   sync.shadow["config"] = jsonCanonico(d.datos || {});
+  const datos = limpiarObj(d.datos || {});
+  // Una config sin rellenar (sin nombre de empresa) nunca pisa una config con datos:
+  // la tuya se re-sube y gana. Evita que un dispositivo recién instalado borre empresa y logo.
+  const remotaVacia = !(datos.empresa && datos.empresa.nombre);
+  const localConDatos = !!(state.config.empresa && state.config.empresa.nombre);
+  if (remotaVacia && localConDatos) return false;
   if ((d.actualizadoEn || 0) > (state.config.syncTs || 0)){
-    Object.assign(state.config, limpiarObj(d.datos || {}));
+    Object.assign(state.config, datos);
     state.config.syncTs = d.actualizadoEn || Date.now();
     return true;
   }
