@@ -495,10 +495,15 @@ function analizarDia(texto){
     return {desde: hhmm(d1), hasta: hhmm(d2), horas: Math.round((d2-d1)/6)/10, texto: desc, nombreCliente: extraerCliente(desc)};
   }).filter(e => e.texto);
 }
-function registrarDia(){
+async function registrarDia(){
   const txt = ($("#texto-nota") ? $("#texto-nota").value : textoNota).trim();
   if (!txt){ alert("Cuéntame tu día con horarios, por ejemplo: «De 6:00 a 9:00 arreglando un motor en almacén de ajos Manuel Pérez, de 9 a 10 en el almacén eléctrico…»"); return; }
-  const entradas = analizarDia(txt);
+  let entradas;
+  if (iaDisponible()){
+    mostrarCargando("La IA está organizando tu día…");
+    try { entradas = await iaDiario(txt); } catch(e){ entradas = analizarDia(txt); }
+    cerrarModal();
+  } else entradas = analizarDia(txt);
   if (!entradas.length){ alert("No he encontrado tramos horarios. Usa el formato «de las 6:00 hasta las 9:00 …, de 9 a 10 …» y vuelve a intentarlo."); return; }
   const fecha = hoy();
   let nuevos = [];
@@ -605,6 +610,7 @@ function htmlNota(){
     <p class="guia">Pulsa el botón y habla: describe una obra para presupuestarla, o cuéntame tu día con horarios («de 6 a 9 estuve en…») y lo apunto todo en tu diario de partes.</p>
     <button class="btn-voz ${grabando?"grabando":""}" id="btn-voz" onclick="toggleGrabacion()">${grabando?"⏹️":"🎤"}</button>
     <div class="estado-voz" id="estado-voz">${grabando?"Grabando… pulsa para parar":"Pulsa para hablar"}</div>
+    <div style="margin-top:6px"><span class="chip ${iaDisponible()?"aceptado":"ref"}">${iaDisponible()?"🧠 IA activada":"⚙️ modo sin conexión"}</span></div>
     <textarea id="texto-nota" placeholder="…o escribe aquí la descripción de la obra a mano." oninput="textoNota=this.value">${esc(textoNota)}</textarea>
     <p class="ejemplo">Ejemplo: «Chalet en Villaviciosa, autoconsumo de 5 kW con 10 paneles de 550, inversor híbrido, tirada de unos 25 metros, cuadro nuevo con protecciones, legalización incluida y 2 operarios 2 jornadas.»</p>
     <div class="pie-form" style="justify-content:center">
@@ -618,16 +624,23 @@ function htmlNota(){
     </div>
   </div>`;
 }
-function calcular(tipo){
+async function calcular(tipo){
   tipo = tipo || "presu";
   const txt = ($("#texto-nota") ? $("#texto-nota").value : textoNota).trim();
   if (!txt){ alert("Graba una nota de voz o escribe la descripción de la obra."); return; }
   textoNota = txt;
-  const lineas = analizar(txt);
-  editando = {id: uid(), tipo, numero: siguienteNumero(tipo), fecha: hoy(), cliente:"", telefono:"", obra:"",
+  let lineas, extraIA = null;
+  if (iaDisponible()){
+    mostrarCargando("La IA está preparando tu " + (tipo==="parte"?"parte":"presupuesto") + "…");
+    try { extraIA = await iaPresupuesto(txt, tipo); lineas = extraIA.lineas; }
+    catch(e){ lineas = analizar(txt); alert("No pude usar la IA (" + e.message + "). He usado el analizador sin conexión."); }
+    cerrarModal();
+  } else lineas = analizar(txt);
+  editando = {id: uid(), tipo, numero: siguienteNumero(tipo), fecha: hoy(),
+    cliente: extraIA ? extraIA.cliente : "", telefono: extraIA ? extraIA.telefono : "", obra: extraIA ? extraIA.obra : "",
     nota: txt, lineas: lineas.length ? lineas : [{concepto:"", cant:1, unidad:"ud", precio:0, esMO:false}],
     margen: state.config.margen, iva: state.config.iva, conIva: state.config.conIva,
-    estado: tipo === "parte" ? "pendiente" : "borrador", firma:"", observaciones:"", sinReconocer: lineas.length === 0};
+    estado: tipo === "parte" ? "pendiente" : "borrador", firma:"", observaciones: extraIA ? extraIA.observaciones : "", sinReconocer: lineas.length === 0};
   vista = "editor"; render(); window.scrollTo(0,0);
 }
 /* ================= PANTALLA: EDITOR ================= */
@@ -957,6 +970,14 @@ function htmlAjustes(){
     <div style="margin-top:12px"><label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-family:'Barlow';font-size:.95rem;color:var(--grafito)"><input type="checkbox" style="width:auto" ${state.config.conIva?"checked":""} onchange="state.config.conIva=this.checked;marcarCambio()"> Incluir IVA en los totales por defecto</label></div>
     <div style="margin-top:12px"><label>Condiciones (pie del PDF)</label><textarea oninput="state.config.condiciones=this.value;marcarCambio()">${esc(state.config.condiciones)}</textarea></div>
     <div class="sep"></div>
+    <h3 class="sub">🧠 Inteligencia artificial (opcional)</h3>
+    <p style="font-size:.9rem;color:var(--gris);margin-bottom:10px">Con tu clave de la API de Claude, los dictados largos se entienden con contexto completo: la IA redacta el parte, identifica cliente y obra, y genera presupuestos completos con todo lo necesario. Se paga por uso a Anthropic (céntimos por dictado). La clave se guarda <strong>solo en este dispositivo</strong> y solo se usa para llamar a la API. Sin clave, funciona el analizador gratuito sin conexión. Consigue tu clave en <strong>console.anthropic.com</strong> → API keys.</p>
+    <div class="rejilla c2">
+      <div><label>Clave API (sk-ant-…)</label><input type="password" value="${esc(state.config.apiKey||"")}" oninput="state.config.apiKey=this.value;marcarCambio()" placeholder="sk-ant-…"></div>
+      <div><label>Modelo</label><input value="${esc(state.config.modeloIA||"claude-sonnet-4-5")}" oninput="state.config.modeloIA=this.value;marcarCambio()"></div>
+    </div>
+    <p style="font-size:.85rem;margin-top:8px">${iaDisponible() ? "🟢 IA activada: tus dictados se procesarán con inteligencia artificial." : "⚪ Sin clave: se usa el analizador gratuito de reglas (funciona sin internet)."}</p>
+    <div class="sep"></div>
     <h3 class="sub">Copia de seguridad</h3>
     <p style="font-size:.92rem;color:var(--gris);margin-bottom:12px">Incluye tus precios, presupuestos y ajustes. Guárdala al terminar y cárgala al volver a abrir la app (o pásala a otro dispositivo).</p>
     <div style="display:flex;gap:10px;flex-wrap:wrap">
@@ -970,6 +991,42 @@ function subirLogo(ev){
   const r = new FileReader();
   r.onload = () => { state.config.empresa.logo = r.result; marcarCambio(); render(); };
   r.readAsDataURL(f);
+}
+/* ================= MOTOR IA (con tu propia clave) ================= */
+function iaDisponible(){ return !!(state.config.apiKey && state.config.apiKey.trim()); }
+function mostrarCargando(msg){ $("#modal").innerHTML = `<div style="position:fixed;inset:0;background:rgba(26,28,30,.72);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:200;color:#fff;gap:14px"><div style="font-size:44px;animation:pulso 1.1s infinite;background:var(--amarillo);border-radius:50%;width:84px;height:84px;display:flex;align-items:center;justify-content:center">⚡</div><div style="font-family:'Barlow Semi Condensed';font-weight:700;text-transform:uppercase;letter-spacing:1px">${msg}</div></div>`; }
+async function iaJSON(sistema, usuario){
+  const r = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {"content-type":"application/json", "x-api-key": state.config.apiKey.trim(),
+      "anthropic-version":"2023-06-01", "anthropic-dangerous-direct-browser-access":"true"},
+    body: JSON.stringify({model: state.config.modeloIA || "claude-sonnet-4-5", max_tokens: 2000,
+      system: sistema, messages:[{role:"user", content: usuario}]})
+  });
+  if (!r.ok) throw new Error("API " + r.status);
+  const d = await r.json();
+  const txt = (d.content && d.content[0] && d.content[0].text || "").replace(/^```json?\s*|\s*```$/g, "").trim();
+  return JSON.parse(txt.slice(txt.indexOf("{"), txt.lastIndexOf("}")+1));
+}
+function iaBasePrecios(){
+  return state.precios.map(p => `${p.k}|${p.nombre}|${p.precio}€/${p.unidad}|${p.tiempo||0}h${p.esMO?"|MO":""}`).join("\n");
+}
+async function iaPresupuesto(txt, tipo){
+  const sis = `Eres el motor de PresuVolt, app de presupuestos y partes para instaladores (electricidad, FV, aerotermia, clima) en España. Devuelve SOLO un JSON válido, sin explicaciones: {"cliente":"","telefono":"","obra":"","observaciones":"","lineas":[{"k":"clave de la base si existe","concepto":"","cant":1,"precio":0,"esMO":false}]}. Usa la clave k de la base de precios del usuario siempre que el concepto exista en ella (el precio y tiempo se tomarán de su base). Si algo no está en la base, pon concepto y precio de coste orientativo en España. Sé exhaustivo: incluye SIEMPRE la mano de obra estimada, y protecciones/cableado/legalización cuando el trabajo lo requiera.\nBASE DE PRECIOS (k|nombre|precio|horas|MO=mano de obra):\n${iaBasePrecios()}`;
+  const j = await iaJSON(sis, `${tipo === "parte" ? "PARTE DE TRABAJO realizado" : "PRESUPUESTO a preparar"}: ${txt}`);
+  const lineas = (j.lineas||[]).map(l => {
+    const it = l.k ? precioDe(l.k) : null;
+    return it ? {concepto: l.concepto || it.nombre, cant: +l.cant||1, unidad: it.unidad, precio: it.precio, tiempo: it.tiempo||0, esMO: !!it.esMO}
+              : {concepto: l.concepto||"", cant: +l.cant||1, unidad:"ud", precio: +l.precio||0, tiempo: 0, esMO: !!l.esMO};
+  }).filter(l => l.concepto);
+  return {lineas, cliente: j.cliente||"", telefono: j.telefono||"", obra: j.obra||"", observaciones: j.observaciones||""};
+}
+async function iaDiario(txt){
+  const sis = `Trocea el relato de la jornada de un instalador en entradas. Devuelve SOLO JSON: {"entradas":[{"desde":"HH:MM","hasta":"HH:MM","texto":"qué hizo, redactado profesional y breve","cliente":"nombre del cliente o lugar, vacío si no hay"}]}. Clientes que ya existen (usa el nombre exacto si coincide): ${state.clientes.map(c=>c.nombre).join(", ") || "ninguno"}.`;
+  const j = await iaJSON(sis, txt);
+  return (j.entradas||[]).map(e => ({desde: e.desde, hasta: e.hasta,
+    horas: Math.max(Math.round(((amin(e.hasta)<=amin(e.desde)?amin(e.hasta)+720:amin(e.hasta))-amin(e.desde))/6)/10, 0),
+    texto: e.texto||"", nombreCliente: e.cliente||""})).filter(e => e.texto && e.desde);
 }
 /* ================= VOZ ================= */
 let rec = null, grabando = false;
