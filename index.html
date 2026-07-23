@@ -233,7 +233,7 @@
 <div id="modal"></div>
 <script>
 "use strict";
-const VERSION_APP = "v22";
+const VERSION_APP = "v23";
 /* ================= BASE DE PRECIOS DE REFERENCIA (por familias) ================= */
 function preciosReferencia(){
   const R = (k,nombre,unidad,precio,tiempo,fam,esMO) => ({k,nombre,unidad,precio,tiempo:tiempo||0,fam,ref:true,esMO:!!esMO});
@@ -1708,7 +1708,7 @@ async function compartirPDF(id){
     const t = totales(p);
     pdfPendiente = {archivo, titulo: p.numero || "Presupuesto",
       texto: `${p.tipo === "parte" ? "Parte de trabajo" : "Presupuesto"} ${p.numero}${p.cliente ? " — " + p.cliente : ""} · TOTAL ${eur(t.total)}`};
-    const puedeCompartir = !!(navigator.canShare && navigator.canShare({files: [archivo]}));
+    const puedeCompartir = !!navigator.share;
     $("#modal").innerHTML = `<div style="position:fixed;inset:0;background:rgba(26,28,30,.6);display:flex;align-items:center;justify-content:center;z-index:150;padding:16px" onclick="if(event.target===this)cerrarModal()">
       <div style="background:#fff;border-radius:14px;padding:22px;max-width:420px;width:100%;text-align:center">
         <div style="font-size:40px">📄</div>
@@ -1716,9 +1716,11 @@ async function compartirPDF(id){
         <p style="color:var(--gris);font-size:.9rem;margin-bottom:16px">${esc(archivo.name)} · ${Math.round(blob.size/1024)} KB</p>
         <div style="display:flex;flex-direction:column;gap:10px">
           ${puedeCompartir ? `<button class="btn wa" onclick="enviarPDFListo()">📤 Enviar por WhatsApp</button>` : ""}
-          <button class="btn sec" onclick="guardarPDFListo()">💾 Guardar el PDF</button>
+          <button class="btn sec" onclick="guardarPDFListo(true)">💾 Guardar el PDF</button>
           <button class="btn sec mini" onclick="cerrarModal()">Cancelar</button>
-        </div></div></div>`;
+        </div>
+        <p style="color:var(--gris);font-size:.78rem;margin-top:12px">Si el menú de compartir no se abre, el PDF se guardará en <b>Descargas</b> y podrás adjuntarlo en WhatsApp con el clip 📎.</p>
+        </div></div>`;
   } catch(e){
     cerrarModal();
     alert("No pude generar el PDF (" + (e && e.message || e) + "). Puedes usar el botón 🖨️ e imprimir como PDF.");
@@ -1726,16 +1728,37 @@ async function compartirPDF(id){
 }
 function enviarPDFListo(){
   if (!pdfPendiente) return;
-  navigator.share({files: [pdfPendiente.archivo], title: pdfPendiente.titulo, text: pdfPendiente.texto})
+  const archivos = [pdfPendiente.archivo];
+  // 1er intento: archivo + texto. En algunos Android falla la mezcla → 2º intento solo archivo.
+  navigator.share({files: archivos, title: pdfPendiente.titulo, text: pdfPendiente.texto})
     .then(() => cerrarModal())
-    .catch(e => { if (e && e.name !== "AbortError") guardarPDFListo(); });
+    .catch(e1 => {
+      if (e1 && e1.name === "AbortError") return;            // el usuario cerró el menú: no es un error
+      navigator.share({files: archivos})
+        .then(() => cerrarModal())
+        .catch(e2 => {
+          if (e2 && e2.name === "AbortError") return;
+          const motivo = (e2 && (e2.name + ": " + e2.message)) || (e1 && (e1.name + ": " + e1.message)) || "desconocido";
+          guardarPDFListo(false);
+          alert("Tu móvil no ha dejado abrir el menú de compartir (" + motivo + ").\n\n" +
+            "Te he GUARDADO el PDF en la carpeta Descargas. Para enviarlo:\n" +
+            "1. Abre WhatsApp y el chat del cliente.\n" +
+            "2. Toca el clip 📎 → Documento.\n" +
+            "3. Elige " + pdfPendiente.archivo.name);
+          cerrarModal();
+        });
+    });
 }
-function guardarPDFListo(){
+function guardarPDFListo(cerrar){
   if (!pdfPendiente) return;
   const a = document.createElement("a");
-  a.href = URL.createObjectURL(pdfPendiente.archivo); a.download = pdfPendiente.archivo.name; a.click();
+  a.href = URL.createObjectURL(pdfPendiente.archivo); a.download = pdfPendiente.archivo.name;
+  document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
-  cerrarModal();
+  if (cerrar !== false){
+    alert("PDF guardado en Descargas: " + pdfPendiente.archivo.name);
+    cerrarModal();
+  }
 }
 function imprimir(id){
   const p = buscarDoc(id); if(!p) return;
