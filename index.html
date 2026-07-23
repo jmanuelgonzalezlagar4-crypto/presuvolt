@@ -233,7 +233,7 @@
 <div id="modal"></div>
 <script>
 "use strict";
-const VERSION_APP = "v21";
+const VERSION_APP = "v22";
 /* ================= BASE DE PRECIOS DE REFERENCIA (por familias) ================= */
 function preciosReferencia(){
   const R = (k,nombre,unidad,precio,tiempo,fam,esMO) => ({k,nombre,unidad,precio,tiempo:tiempo||0,fam,ref:true,esMO:!!esMO});
@@ -1698,27 +1698,44 @@ async function generarPDF(p){
   }
   return pdf.output("blob");
 }
+let pdfPendiente = null;
 async function compartirPDF(id){
   const p = buscarDoc(id); if (!p) return;
   mostrarCargando("Preparando el PDF…");
   try {
     const blob = await generarPDF(p);
-    cerrarModal();
     const archivo = new File([blob], (p.numero || "presupuesto") + ".pdf", {type: "application/pdf"});
-    if (navigator.canShare && navigator.canShare({files: [archivo]})){
-      const t = totales(p);
-      await navigator.share({files: [archivo], title: p.numero || "Presupuesto",
-        text: `${p.tipo === "parte" ? "Parte de trabajo" : "Presupuesto"} ${p.numero}${p.cliente ? " — " + p.cliente : ""} · TOTAL ${eur(t.total)}`}).catch(() => {});
-    } else {
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob); a.download = archivo.name; a.click();
-      setTimeout(() => URL.revokeObjectURL(a.href), 5000);
-      alert("He guardado el PDF en Descargas. Adjúntalo en WhatsApp con el clip 📎.");
-    }
+    const t = totales(p);
+    pdfPendiente = {archivo, titulo: p.numero || "Presupuesto",
+      texto: `${p.tipo === "parte" ? "Parte de trabajo" : "Presupuesto"} ${p.numero}${p.cliente ? " — " + p.cliente : ""} · TOTAL ${eur(t.total)}`};
+    const puedeCompartir = !!(navigator.canShare && navigator.canShare({files: [archivo]}));
+    $("#modal").innerHTML = `<div style="position:fixed;inset:0;background:rgba(26,28,30,.6);display:flex;align-items:center;justify-content:center;z-index:150;padding:16px" onclick="if(event.target===this)cerrarModal()">
+      <div style="background:#fff;border-radius:14px;padding:22px;max-width:420px;width:100%;text-align:center">
+        <div style="font-size:40px">📄</div>
+        <h3 class="sub" style="margin:6px 0 2px">PDF listo</h3>
+        <p style="color:var(--gris);font-size:.9rem;margin-bottom:16px">${esc(archivo.name)} · ${Math.round(blob.size/1024)} KB</p>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          ${puedeCompartir ? `<button class="btn wa" onclick="enviarPDFListo()">📤 Enviar por WhatsApp</button>` : ""}
+          <button class="btn sec" onclick="guardarPDFListo()">💾 Guardar el PDF</button>
+          <button class="btn sec mini" onclick="cerrarModal()">Cancelar</button>
+        </div></div></div>`;
   } catch(e){
     cerrarModal();
     alert("No pude generar el PDF (" + (e && e.message || e) + "). Puedes usar el botón 🖨️ e imprimir como PDF.");
   }
+}
+function enviarPDFListo(){
+  if (!pdfPendiente) return;
+  navigator.share({files: [pdfPendiente.archivo], title: pdfPendiente.titulo, text: pdfPendiente.texto})
+    .then(() => cerrarModal())
+    .catch(e => { if (e && e.name !== "AbortError") guardarPDFListo(); });
+}
+function guardarPDFListo(){
+  if (!pdfPendiente) return;
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(pdfPendiente.archivo); a.download = pdfPendiente.archivo.name; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  cerrarModal();
 }
 function imprimir(id){
   const p = buscarDoc(id); if(!p) return;
