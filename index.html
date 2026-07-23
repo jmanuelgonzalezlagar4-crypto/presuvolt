@@ -233,7 +233,7 @@
 <div id="modal"></div>
 <script>
 "use strict";
-const VERSION_APP = "v20";
+const VERSION_APP = "v21";
 /* ================= BASE DE PRECIOS DE REFERENCIA (por familias) ================= */
 function preciosReferencia(){
   const R = (k,nombre,unidad,precio,tiempo,fam,esMO) => ({k,nombre,unidad,precio,tiempo:tiempo||0,fam,ref:true,esMO:!!esMO});
@@ -1028,7 +1028,7 @@ function htmlEditor(){
       <button class="btn sec" onclick="vista='nota';render()">← Volver a la nota</button>
       <button class="btn sec" onclick="if(guardar(true)) verPrevio(editando.id)">👁️ Ver presupuesto</button>
       <button class="btn sec" onclick="if(guardar(true)) imprimir(editando.id)">🖨️ PDF</button>
-      <button class="btn wa" onclick="if(guardar(true)) porWhatsApp(editando.id)">💬 WhatsApp</button>
+      <button class="btn wa" onclick="if(guardar(true)) compartirPDF(editando.id)">💬 Enviar PDF</button>
       <button class="btn amarillo" onclick="guardar()">💾 Guardar</button>
     </div>
   </div>`;
@@ -1390,7 +1390,7 @@ function htmlLista(tipo){
       <td onclick="event.stopPropagation()" style="white-space:nowrap">
         <button class="btn-icono" title="Ver documento" onclick="verPrevio('${p.id}')">👁️</button>
         <button class="btn-icono" title="PDF" onclick="imprimir('${p.id}')">🖨️</button>
-        <button class="btn-icono" title="WhatsApp" onclick="porWhatsApp('${p.id}')">💬</button>
+        <button class="btn-icono" title="Enviar PDF por WhatsApp" onclick="compartirPDF('${p.id}')">💬</button>
         <button class="btn-icono" title="Eliminar" onclick="borrar('${p.id}')">🗑️</button>
       </td></tr>`; }).join("");
   const cards = lista.map(p => { const t = totales(p);
@@ -1402,7 +1402,7 @@ function htmlLista(tipo){
         <span onclick="event.stopPropagation()">
           <button class="btn-icono" onclick="verPrevio('${p.id}')">👁️</button>
           <button class="btn-icono" onclick="imprimir('${p.id}')">🖨️</button>
-          <button class="btn-icono" onclick="porWhatsApp('${p.id}')">💬</button>
+          <button class="btn-icono" onclick="compartirPDF('${p.id}')">💬</button>
           <button class="btn-icono" onclick="borrar('${p.id}')">🗑️</button>
         </span></div></div>`; }).join("");
   return avisoDatos() + `<div class="tarjeta">
@@ -1669,6 +1669,57 @@ function docHtml(p){
     <div class="doc-pie">${esc(state.config.condiciones)}</div>
   </div>`;
 }
+async function cargarLibsPDF(){
+  const cargar = u => new Promise((ok, ko) => { const s = document.createElement("script"); s.src = u; s.onload = ok; s.onerror = () => ko(new Error("sin conexión para descargar el generador de PDF")); document.head.appendChild(s); });
+  if (!window.html2canvas) await cargar("https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js");
+  if (!window.jspdf) await cargar("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
+}
+async function generarPDF(p){
+  await cargarLibsPDF();
+  const cont = document.createElement("div");
+  cont.style.cssText = "position:fixed;left:-10000px;top:0;width:794px;background:#fff";
+  cont.innerHTML = docHtml(p);
+  document.body.appendChild(cont);
+  const canvas = await html2canvas(cont, {scale: 2, backgroundColor: "#ffffff", useCORS: true, logging: false});
+  document.body.removeChild(cont);
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({unit: "mm", format: "a4", compress: true});
+  const margen = 8, util = 210 - margen * 2;
+  const pxPorMM = canvas.width / util;
+  const altoPaginaPx = Math.floor((297 - margen * 2) * pxPorMM);
+  let y = 0, primera = true;
+  while (y < canvas.height){
+    const trozo = document.createElement("canvas");
+    trozo.width = canvas.width; trozo.height = Math.min(altoPaginaPx, canvas.height - y);
+    trozo.getContext("2d").drawImage(canvas, 0, y, canvas.width, trozo.height, 0, 0, canvas.width, trozo.height);
+    if (!primera) pdf.addPage();
+    pdf.addImage(trozo.toDataURL("image/jpeg", 0.92), "JPEG", margen, margen, util, trozo.height / pxPorMM);
+    primera = false; y += altoPaginaPx;
+  }
+  return pdf.output("blob");
+}
+async function compartirPDF(id){
+  const p = buscarDoc(id); if (!p) return;
+  mostrarCargando("Preparando el PDF…");
+  try {
+    const blob = await generarPDF(p);
+    cerrarModal();
+    const archivo = new File([blob], (p.numero || "presupuesto") + ".pdf", {type: "application/pdf"});
+    if (navigator.canShare && navigator.canShare({files: [archivo]})){
+      const t = totales(p);
+      await navigator.share({files: [archivo], title: p.numero || "Presupuesto",
+        text: `${p.tipo === "parte" ? "Parte de trabajo" : "Presupuesto"} ${p.numero}${p.cliente ? " — " + p.cliente : ""} · TOTAL ${eur(t.total)}`}).catch(() => {});
+    } else {
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob); a.download = archivo.name; a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+      alert("He guardado el PDF en Descargas. Adjúntalo en WhatsApp con el clip 📎.");
+    }
+  } catch(e){
+    cerrarModal();
+    alert("No pude generar el PDF (" + (e && e.message || e) + "). Puedes usar el botón 🖨️ e imprimir como PDF.");
+  }
+}
 function imprimir(id){
   const p = buscarDoc(id); if(!p) return;
   $("#zona-impresion").innerHTML = docHtml(p);
@@ -1685,7 +1736,7 @@ function verPrevio(id){
       <div class="pie-form" style="padding:10px 14px;margin:0;border-top:1.5px solid var(--linea)">
         <button class="btn sec mini" onclick="cerrarModal()">← Seguir editando</button>
         <button class="btn sec mini" onclick="cerrarModal();imprimir('${p.id}')">🖨️ PDF</button>
-        <button class="btn wa mini" onclick="cerrarModal();porWhatsApp('${p.id}')">💬 Enviar por WhatsApp</button>
+        <button class="btn wa mini" onclick="cerrarModal();compartirPDF('${p.id}')">💬 Enviar PDF</button>
       </div></div></div>`;
 }
 function porWhatsApp(id){
