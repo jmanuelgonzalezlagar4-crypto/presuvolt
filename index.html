@@ -233,7 +233,7 @@
 <div id="modal"></div>
 <script>
 "use strict";
-const VERSION_APP = "v24";
+const VERSION_APP = "v25";
 /* ================= BASE DE PRECIOS DE REFERENCIA (por familias) ================= */
 function preciosReferencia(){
   const R = (k,nombre,unidad,precio,tiempo,fam,esMO) => ({k,nombre,unidad,precio,tiempo:tiempo||0,fam,ref:true,esMO:!!esMO});
@@ -1767,8 +1767,8 @@ function guardarPDFListo(cerrar){
     cerrarModal();
   }
 }
-const URL_APP = "https://jmanuelgonzalezlagar4-crypto.github.io/presuvolt/";
-const TEXTO_RECOMIENDA = "Échale un ojo a PresuVolt ⚡ La app con la que hago los presupuestos hablando: le dictas la obra («8 enchufes, 2 downlight y una jornada») y te saca el presupuesto en PDF con tu logo, listo para mandar al cliente. Gratis y sin cuotas. Ábrela aquí y dale a «Añadir a pantalla de inicio»: " + URL_APP;
+const URL_APP = "https://play.google.com/apps/testing/io.github.jmanuelgonzalezlagar4_crypto.presuvolt";
+const TEXTO_RECOMIENDA = "Échale un ojo a PresuVolt ⚡ La app con la que hago los presupuestos hablando: le dictas la obra («8 enchufes, 2 downlight y una jornada») y te saca el presupuesto en PDF con tu logo, listo para mandar al cliente. Gratis y sin cuotas. Instálala desde Google Play (solo Android): " + URL_APP + " — Está en fase de pruebas: entra, acepta ser tester e instálala. Si te dice que no está disponible, pásame tu Gmail y te doy acceso en un momento.";
 function recomendarWhatsApp(){
   window.open("https://wa.me/?text=" + encodeURIComponent(TEXTO_RECOMIENDA), "_blank");
 }
