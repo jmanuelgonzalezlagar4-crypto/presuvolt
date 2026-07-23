@@ -233,7 +233,7 @@
 <div id="modal"></div>
 <script>
 "use strict";
-const VERSION_APP = "v23";
+const VERSION_APP = "v24";
 /* ================= BASE DE PRECIOS DE REFERENCIA (por familias) ================= */
 function preciosReferencia(){
   const R = (k,nombre,unidad,precio,tiempo,fam,esMO) => ({k,nombre,unidad,precio,tiempo:tiempo||0,fam,ref:true,esMO:!!esMO});
@@ -1505,6 +1505,13 @@ function htmlAjustes(){
       <button class="btn sec" onclick="document.getElementById('importar').click()">📂 Cargar copia</button>
     </div>
     ${htmlSyncAjustes()}
+    <div class="sep"></div>
+    <h3 class="sub">📣 Recomienda PresuVolt</h3>
+    <p style="font-size:.92rem;color:var(--gris);margin-bottom:12px">¿Conoces a otro instalador al que le vendría bien? Mándale la app por WhatsApp con un toque.</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn wa" onclick="recomendarWhatsApp()">💬 Enviar por WhatsApp a un amigo</button>
+      <button class="btn sec" onclick="recomendarOtro()">📤 Compartir de otra forma</button>
+    </div>
     <div style="text-align:center;color:var(--gris);font-size:.75rem;margin-top:18px;font-family:'IBM Plex Mono',monospace">PresuVolt ${VERSION_APP}</div>
   </div>`;
 }
@@ -1758,6 +1765,21 @@ function guardarPDFListo(cerrar){
   if (cerrar !== false){
     alert("PDF guardado en Descargas: " + pdfPendiente.archivo.name);
     cerrarModal();
+  }
+}
+const URL_APP = "https://jmanuelgonzalezlagar4-crypto.github.io/presuvolt/";
+const TEXTO_RECOMIENDA = "Échale un ojo a PresuVolt ⚡ La app con la que hago los presupuestos hablando: le dictas la obra («8 enchufes, 2 downlight y una jornada») y te saca el presupuesto en PDF con tu logo, listo para mandar al cliente. Gratis y sin cuotas. Ábrela aquí y dale a «Añadir a pantalla de inicio»: " + URL_APP;
+function recomendarWhatsApp(){
+  window.open("https://wa.me/?text=" + encodeURIComponent(TEXTO_RECOMIENDA), "_blank");
+}
+function recomendarOtro(){
+  if (navigator.share){
+    navigator.share({title: "PresuVolt", text: TEXTO_RECOMIENDA}).catch(() => {});
+  } else {
+    const a = document.createElement("textarea");
+    a.value = TEXTO_RECOMIENDA; document.body.appendChild(a); a.select();
+    document.execCommand("copy"); a.remove();
+    alert("Mensaje copiado. Pégalo donde quieras (SMS, correo, Telegram…).");
   }
 }
 function imprimir(id){
