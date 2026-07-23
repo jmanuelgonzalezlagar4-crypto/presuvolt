@@ -141,48 +141,50 @@
     body{background:#fff}
     #zona-impresion{display:block;color:#000}
   }
-  .doc{max-width:760px;margin:0 auto;padding:10px;font-family:'Barlow',sans-serif;color:#1A1C1E;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .doc-cinta{border-top:3px solid #1A1C1E;border-bottom:2px solid #F5C400;height:3px;margin-bottom:18px}
-  .doc-cab{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:20px;padding-bottom:14px;border-bottom:2.5px solid #1A1C1E;margin-bottom:2px}
-  .doc-cab img{max-height:60px;max-width:180px}
-  .doc-cab .emp{font-size:12px;line-height:1.5;color:#3a3d40}
-  .doc-cab .emp strong{font-size:17px;font-family:'Barlow Semi Condensed',sans-serif;text-transform:uppercase;letter-spacing:.3px;color:#1A1C1E}
+  .doc{max-width:760px;margin:0 auto;padding:6px;font-family:'Barlow',sans-serif;color:#22252a;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .doc-card{background:#faf9f6;border:1px solid #eceae3;border-radius:14px;padding:16px 20px;margin-bottom:12px;break-inside:avoid;page-break-inside:avoid}
+  .doc-card.amarilla{background:#FFF6CE;border-color:#f2df9a}
+  .doc-cab{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:14px}
+  .doc-cab .emp{display:flex;gap:16px;align-items:center;font-size:12px;color:#5d6167;line-height:1.55}
+  .doc-cab .emp img{max-height:58px;max-width:170px;border-radius:8px}
+  .doc-cab .emp strong{display:block;font-family:'Barlow Semi Condensed',sans-serif;font-size:17.5px;color:#22252a;text-transform:uppercase;letter-spacing:.3px}
   .doc-tit{text-align:right}
-  .doc-tit h2{font-family:'Barlow Semi Condensed',sans-serif;font-size:21px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
-  .doc-tit table{margin-left:auto;border-collapse:collapse;font-size:11px;font-family:'IBM Plex Mono',monospace}
-  .doc-tit td{padding:1.5px 0 1.5px 14px;text-align:right}
-  .doc-tit td:first-child{color:#5B5E63;text-transform:uppercase;font-size:9.5px;letter-spacing:.5px}
-  .doc-badges{display:flex;justify-content:center;flex-wrap:wrap;gap:6px 22px;margin:10px 0 16px;padding:7px 0;border-bottom:1px solid #DDDDD6;font-family:'Barlow Semi Condensed',sans-serif;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#3a3d40}
-  .doc-badges span::before{content:"✓  ";color:#8a6d00}
-  .doc-cliente{border-left:4px solid #F5C400;padding:8px 0 8px 14px;margin-bottom:16px;font-size:12.5px;line-height:1.6}
-  .doc-cliente .etq{font-family:'Barlow Semi Condensed',sans-serif;text-transform:uppercase;font-size:9.5px;letter-spacing:.8px;color:#5B5E63;display:block}
-  .doc-tabla{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:4px}
-  .doc-tabla th{font-family:'Barlow Semi Condensed',sans-serif;text-transform:uppercase;font-size:10px;letter-spacing:.8px;text-align:left;color:#1A1C1E;border-bottom:2px solid #1A1C1E;padding:6px 8px}
-  .doc-tabla th.n,.doc-tabla td.n{text-align:right;white-space:nowrap;font-family:'IBM Plex Mono',monospace}
-  .doc-tabla td{padding:7px 8px;border-bottom:1px solid #e8e7e2;vertical-align:top;line-height:1.45}
-  .doc-tabla td.n{font-size:11.5px}
-  .doc-tabla tr:nth-child(even) td{background:#fafaf7}
-  .doc-resumen{width:290px;margin-left:auto;border-collapse:collapse;font-family:'IBM Plex Mono',monospace;font-size:12px;margin-top:8px}
-  .doc-resumen td{padding:5px 8px;text-align:right}
-  .doc-resumen td:first-child{color:#5B5E63;text-align:left;font-family:'Barlow',sans-serif}
-  .doc-resumen tr.tot td{border-top:2.5px solid #1A1C1E;border-bottom:3px double #1A1C1E;font-weight:600;font-size:15px;padding:9px 8px;background:#FFF7D6}
-  .doc-dato{display:flex;gap:8px 26px;flex-wrap:wrap;border:1px solid #DDDDD6;border-left:4px solid #1A1C1E;padding:9px 14px;font-size:11px;margin-top:16px;color:#3a3d40}
-  .doc-dato strong{color:#1A1C1E}
-  .doc-fotos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}
-  .doc-fotos img{width:100%;height:112px;object-fit:cover;border:1px solid #c9c9c2}
-  .doc-fotos-tit,.doc-obs-tit{font-family:'Barlow Semi Condensed',sans-serif;text-transform:uppercase;font-size:10px;letter-spacing:.8px;color:#5B5E63;margin:16px 0 6px;border-bottom:1px solid #DDDDD6;padding-bottom:3px}
-  .doc .obs{font-size:11.5px;color:#3a3d40;white-space:pre-wrap;line-height:1.55}
-  .doc-cta{margin-top:20px;border:1.5px solid #1A1C1E;padding:0;display:flex;flex-wrap:wrap}
-  .doc-cta .cta-txt{flex:1.4;min-width:230px;padding:12px 16px;font-size:11.5px;line-height:1.6;color:#1A1C1E}
-  .doc-cta .cta-txt h4{font-family:'Barlow Semi Condensed',sans-serif;text-transform:uppercase;font-size:11px;letter-spacing:.8px;margin-bottom:4px;border-bottom:2px solid #F5C400;display:inline-block;padding-bottom:2px}
-  .doc-cta .cta-firma{flex:1;min-width:180px;border-left:1.5px solid #1A1C1E;padding:12px 16px;display:flex;flex-direction:column;justify-content:flex-end}
-  .doc-cta .cta-firma .linea{border-top:1px solid #5B5E63;margin-top:46px;padding-top:5px;font-size:9.5px;color:#5B5E63;text-align:center;font-family:'IBM Plex Mono',monospace;text-transform:uppercase}
-  .doc-pie{margin-top:24px;font-size:10px;color:#5B5E63;border-top:1px solid #DDDDD6;padding-top:8px;line-height:1.5}
-  .doc-firmas{display:flex;gap:30px;margin-top:28px}
-  .doc-firmas>div{flex:1}
-  .doc-firmas .hueco{height:78px;display:flex;align-items:flex-end;justify-content:center}
-  .doc-firmas .hueco img{max-height:74px;max-width:100%}
-  .doc-firmas .linea{border-top:1px solid #5B5E63;padding-top:6px;font-size:10.5px;color:#5B5E63;text-align:center;font-family:'IBM Plex Mono',monospace;text-transform:uppercase}
+  .doc-tit h2{font-family:'Barlow Semi Condensed',sans-serif;font-weight:800;font-size:23px;text-transform:uppercase;letter-spacing:1px}
+  .doc-tit .num{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#5d6167;margin-top:2px}
+  .doc-fila{display:flex;gap:12px;flex-wrap:wrap}
+  .doc-fila .doc-card{flex:1;min-width:150px}
+  .doc-etq{font-family:'Barlow Semi Condensed',sans-serif;font-size:9.5px;letter-spacing:1.4px;text-transform:uppercase;color:#a0a4aa;margin-bottom:3px}
+  .doc-card.amarilla .doc-etq{color:#8a7a33}
+  .doc-val{font-size:13.5px;font-weight:600}
+  .doc-tabla{width:100%;border-collapse:collapse;font-size:12.5px}
+  .doc-tabla th{font-family:'Barlow Semi Condensed',sans-serif;font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:#a0a4aa;text-align:left;padding:2px 10px 8px;font-weight:700}
+  .doc-tabla th.n{text-align:right}
+  .doc-tabla td{padding:9px 10px;line-height:1.45}
+  .doc-tabla tr:nth-child(odd) td{background:#fff}
+  .doc-tabla tr:nth-child(odd) td:first-child{border-radius:8px 0 0 8px}
+  .doc-tabla tr:nth-child(odd) td:last-child{border-radius:0 8px 8px 0}
+  .doc-tabla td.n{text-align:right;font-family:'IBM Plex Mono',monospace;font-size:11.5px;white-space:nowrap;color:#44484e}
+  .doc-totalcard{display:flex;justify-content:space-between;align-items:center;gap:14px;background:#FFEF9E;border-color:#eed77a}
+  .doc-totalcard .t1{font-family:'Barlow Semi Condensed',sans-serif;font-size:12.5px;letter-spacing:1.6px;text-transform:uppercase;color:#6b5600}
+  .doc-totalcard .t2{font-size:10.5px;color:#8a7a33;margin-top:2px}
+  .doc-totalcard .imp{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:27px;color:#22252a;white-space:nowrap}
+  .doc-minis{display:flex;gap:12px;flex-wrap:wrap}
+  .doc-minis .doc-card{flex:1;min-width:140px;text-align:center;padding:12px 8px}
+  .doc-minis span{font-size:10.5px;color:#7c8087}
+  .doc-minis b{display:block;font-size:12.5px;margin-top:2px}
+  .doc-fotos{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:8px}
+  .doc-fotos img{width:100%;height:106px;object-fit:cover;border-radius:8px;border:1px solid #e4e1d6}
+  .doc .obs{font-size:11.5px;color:#44484e;white-space:pre-wrap;line-height:1.6;margin-top:4px}
+  .doc-cta{display:flex;gap:22px;align-items:center;flex-wrap:wrap;background:#f3f1ea;border-color:#e4e1d6}
+  .doc-cta .txt{flex:1.4;min-width:220px;font-size:11.8px;line-height:1.6;color:#44484e}
+  .doc-cta .txt b{color:#22252a}
+  .doc-cta .titcta{font-family:'Barlow Semi Condensed',sans-serif;text-transform:uppercase;font-size:12.5px;letter-spacing:1.2px;color:#22252a;display:block;margin-bottom:3px}
+  .doc-firmabox{flex:1;min-width:180px;background:#fff;border:1px dashed #c9c9c2;border-radius:10px;height:84px;position:relative}
+  .doc-firmabox img{position:absolute;inset:4px auto 16px 4px;max-height:60px;max-width:calc(100% - 8px)}
+  .doc-firmabox span{position:absolute;bottom:5px;left:0;right:0;text-align:center;font-size:8.5px;color:#a0a4aa;font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.5px}
+  .doc-sellos{display:flex;justify-content:center;gap:14px 30px;flex-wrap:wrap;font-family:'Barlow Semi Condensed',sans-serif;font-size:10px;letter-spacing:1.3px;text-transform:uppercase;color:#7c8087;margin:6px 0 10px}
+  .doc-sellos span::before{content:"✓ ";color:#c79a00}
+  .doc-pie{font-size:9.5px;color:#b3b7bc;text-align:center;margin-top:4px;line-height:1.5}
 </style>
 </head>
 <body>
@@ -1600,42 +1602,41 @@ function docHtml(p){
   const he = horasEstimadas(p);
   const sellos = String(state.config.sellos || "").split("·").map(s => s.trim()).filter(Boolean);
   const fotos = (p.fotos || []).slice(0, 6);
+  const jorn = Math.max(1, Math.ceil(he/8));
   return `<div class="doc">
-    <div class="doc-cab">
-      <div style="display:flex;gap:16px;align-items:flex-start">
-        ${e.logo?`<img src="${e.logo}">`:""}
-        <div class="emp"><strong>${esc(e.nombre||"Tu empresa")}</strong><br>
-          ${e.nif?"NIF: "+esc(e.nif)+"<br>":""}${esc(e.telefono||"")}${e.telefono&&e.email?" · ":""}${esc(e.email||"")}</div></div>
-      <div class="doc-tit"><h2>${esPresu ? "Presupuesto" : "Parte de trabajo"}</h2>
-        <table>
-          <tr><td>Número</td><td>${esc(p.numero)}</td></tr>
-          <tr><td>Fecha</td><td>${fFecha(p.fecha)}</td></tr>
-          ${validez?`<tr><td>Válido hasta</td><td>${validez}</td></tr>`:""}
-        </table></div>
+    <div class="doc-card doc-cab">
+      <div class="emp">${e.logo?`<img src="${e.logo}">`:""}<div><strong>${esc(e.nombre||"Tu empresa")}</strong>${e.nif?"NIF "+esc(e.nif)+"<br>":""}${esc(e.telefono||"")}${e.telefono&&e.email?" · ":""}${esc(e.email||"")}</div></div>
+      <div class="doc-tit"><h2>${esPresu ? "Presupuesto" : "Parte de trabajo"}</h2><div class="num">${esc(p.numero)} · ${fFecha(p.fecha)}</div></div>
     </div>
-    <div class="doc-cinta"></div>
-    ${sellos.length?`<div class="doc-badges">${sellos.map(s=>`<span>${esc(s)}</span>`).join("")}</div>`:""}
-    ${p.cliente||p.obra?`<div class="doc-cliente" style="display:flex;gap:44px;flex-wrap:wrap">${p.cliente?`<span><span class="etq">Cliente</span><strong>${esc(p.cliente)}</strong></span>`:""}${p.obra?`<span><span class="etq">Obra / dirección</span>${esc(p.obra)}</span>`:""}</div>`:""}
-    <table class="doc-tabla">
-      <thead><tr><th>Concepto</th><th class="n">Cantidad</th><th class="n">Precio ud.</th><th class="n">Importe</th></tr></thead>
-      <tbody>${filas}</tbody>
-    </table>
-    <table class="doc-resumen">
-      ${p.conIva?`<tr><td>Base imponible</td><td>${eur(t.venta)}</td></tr><tr><td>IVA (${p.iva} %)</td><td>${eur(t.iva)}</td></tr>`:""}
-      <tr class="tot"><td>TOTAL${p.conIva?"":" (IVA no incluido)"}</td><td>${eur(t.total)}</td></tr>
-    </table>
-    ${esPresu && he ? `<div class="doc-dato"><span><strong>Plazo de ejecución estimado:</strong> ${Math.max(1,Math.ceil(he/8))} jornada${Math.ceil(he/8)>1?"s":""}</span><span><strong>Inicio:</strong> fecha a convenir con usted</span><span><strong>Incluye:</strong> materiales y mano de obra</span></div>` : ""}
-    ${fotos.length?`<div class="doc-fotos-tit">Fotografías</div><div class="doc-fotos">${fotos.map(f=>`<img src="${f}">`).join("")}</div>`:""}
-    ${p.observaciones?`<div class="doc-obs-tit">Observaciones</div><div class="obs">${esc(p.observaciones)}</div>`:""}
-    ${esPresu ? `<div class="doc-cta">
-      <div class="cta-txt"><h4>Aceptación del presupuesto</h4>
-        Para aceptarlo, basta con responder por WhatsApp${e.telefono?` o llamar al <strong>${esc(e.telefono)}</strong>`:""}, o firmar este documento. En cuanto nos confirme, reservamos fecha. Presupuesto sin compromiso, con el precio garantizado durante su periodo de validez.</div>
-      <div class="cta-firma"><div class="linea">Aceptado — firma del cliente y fecha</div></div>
+    <div class="doc-fila">
+      ${p.cliente?`<div class="doc-card"><div class="doc-etq">Cliente</div><div class="doc-val">${esc(p.cliente)}</div></div>`:""}
+      ${p.obra?`<div class="doc-card"><div class="doc-etq">Obra / dirección</div><div class="doc-val">${esc(p.obra)}</div></div>`:""}
+      ${validez?`<div class="doc-card amarilla"><div class="doc-etq">Oferta válida hasta</div><div class="doc-val">${validez}</div></div>`:""}
+    </div>
+    <div class="doc-card">
+      <table class="doc-tabla"><thead><tr><th>Concepto</th><th class="n">Cantidad</th><th class="n">Precio ud.</th><th class="n">Importe</th></tr></thead>
+      <tbody>${filas}</tbody></table>
+    </div>
+    <div class="doc-card doc-totalcard">
+      <div><div class="t1">Total del ${esPresu?"presupuesto":"parte"}</div>
+        <div class="t2">${p.conIva ? `Base ${eur(t.venta)} · IVA (${p.iva} %) ${eur(t.iva)} · IVA incluido` : "IVA no incluido · precio cerrado, sin sorpresas"}</div></div>
+      <div class="imp">${eur(t.total)}</div>
+    </div>
+    ${esPresu && he ? `<div class="doc-minis">
+      <div class="doc-card"><span>Plazo estimado</span><b>${jorn} jornada${jorn>1?"s":""}</b></div>
+      <div class="doc-card"><span>Inicio</span><b>A convenir con usted</b></div>
+      <div class="doc-card"><span>Incluye</span><b>Material + mano de obra</b></div>
     </div>` : ""}
-    ${!esPresu ? `<div class="doc-firmas">
-      <div><div class="hueco"></div><div class="linea">Firma del técnico</div></div>
-      <div><div class="hueco">${p.firma?`<img src="${p.firma}">`:""}</div><div class="linea">Conforme del cliente</div></div>
-    </div>` : ""}
+    ${fotos.length?`<div class="doc-card"><div class="doc-etq">Fotografías</div><div class="doc-fotos">${fotos.map(f=>`<img src="${f}">`).join("")}</div></div>`:""}
+    ${p.observaciones?`<div class="doc-card"><div class="doc-etq">Observaciones</div><div class="obs">${esc(p.observaciones)}</div></div>`:""}
+    ${esPresu ? `<div class="doc-card doc-cta">
+      <div class="txt"><span class="titcta">Reserve su fecha</span>Responda a este WhatsApp${e.telefono?` o llame al <b>${esc(e.telefono)}</b>`:""} y lo dejamos cerrado. Sin compromiso — también puede firmar aquí mismo para aceptarlo, con el precio garantizado durante la validez de la oferta.</div>
+      <div class="doc-firmabox"><span>Aceptado · firma del cliente y fecha</span></div>
+    </div>` : `<div class="doc-card doc-cta">
+      <div class="doc-firmabox"><span>Firma del técnico</span></div>
+      <div class="doc-firmabox">${p.firma?`<img src="${p.firma}">`:""}<span>Conforme del cliente</span></div>
+    </div>`}
+    ${sellos.length?`<div class="doc-sellos">${sellos.map(s=>`<span>${esc(s)}</span>`).join("")}</div>`:""}
     <div class="doc-pie">${esc(state.config.condiciones)}</div>
   </div>`;
 }
